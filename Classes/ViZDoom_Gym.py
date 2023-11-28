@@ -1,6 +1,6 @@
 import numpy as np
-from gym import Env
-from gym.spaces import Discrete, Box
+from gymnasium import Env
+from gymnasium.spaces import Discrete, Box
 import vizdoom as vzd
 import cv2
 

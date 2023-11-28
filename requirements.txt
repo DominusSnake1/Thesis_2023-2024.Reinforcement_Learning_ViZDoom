@@ -1,8 +1,16 @@
-numpy
-vizdoom
-gym
-opencv-python
+numpy~=1.26.2
+vizdoom~=1.2.2
+gym~=0.26.2
+gymnasium~=0.29.1
+opencv-python~=4.8.1.78
 torch --index-url https://download.pytorch.org/whl/rocm5.6
 torchvision --index-url https://download.pytorch.org/whl/rocm5.6
 torchaudio --index-url https://download.pytorch.org/whl/rocm5.6
 stable-baselines3[extra]
+psutil~=5.9.6
+tqdm~=4.66.1
+torch~=2.1.1
+matplotlib~=3.8.2
+setuptools~=68.0.0
+wheel~=0.41.2
+pygame~=2.5.2
