@@ -7,6 +7,7 @@ class TrainAndLog_Callback(BaseCallback):
         super(TrainAndLog_Callback, self).__init__(verbose)
         self.check_freq = check_freq
         self.save_path = save_path
+        self._init_callback()
 
     def _init_callback(self):
         if self.save_path is not None:
@@ -17,4 +18,4 @@ class TrainAndLog_Callback(BaseCallback):
             model_path = os.path.join(self.save_path, 'best_model_{}'.format(self.n_calls))
             self.model.save(model_path)
 
-        return True
+        return super()._on_step()

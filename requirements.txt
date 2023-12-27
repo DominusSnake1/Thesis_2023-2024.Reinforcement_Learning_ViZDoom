@@ -1,6 +1,6 @@
 numpy
 gym
 gymnasium
-opencv
 stable-baselines3[extra]
-nvidia-ml
+nvidia-ml-py
+vizdoom

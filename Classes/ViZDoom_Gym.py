@@ -32,16 +32,18 @@ class ViZDoom_Gym(Env):
         if self.game.get_state():
             state = self.game.get_state().screen_buffer
             state = grayscale(state)
-            info = self.game.get_state().game_variables
+            ammo = self.game.get_state().game_variables[0]
+            info = ammo
         else:
             state = np.zeros(self.observation_space.shape)
             info = 0
 
+        info = {"info": info}
         done = self.game.is_episode_finished()
 
         return state, reward, done, info
 
-    def reset(self):
+    def reset(self, seed=None):
         self.game.new_episode()
         state = self.game.get_state().screen_buffer
         return grayscale(state)

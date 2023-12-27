@@ -6,7 +6,7 @@ RAM: 32 GB DDR5 <br>
 
 ## <u>Step 0</u>:<br>Create a Conda Environment (if it doesn't exist).
 ```bash
-conda create --name DoomPy39 python=3.9
+conda create --name DoomPy39 python=3.9 pip
 ```
 
 ## <u>Step 1</u>:<br>Activate the Conda Environment.
@@ -16,13 +16,10 @@ conda activate DoomPy39
 
 ## <u>Step 2</u>:<br>Install the required packages.
 ```bash
-conda install -c conda-forge --file requirements.txt
+pip install -r requirements.txt
 ```
 ```bash
-pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm5.6
-```
-```bash
-pip3 install vizdoom
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm5.6
 ```
 
 ## <u>Step 3</u>:<br>This is required for the Project to work.
