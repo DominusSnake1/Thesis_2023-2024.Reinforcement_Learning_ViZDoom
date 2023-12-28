@@ -19,7 +19,7 @@ conda activate DoomPy39
 pip install -r requirements.txt
 ```
 ```bash
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm5.6
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm5.6
 ```
 
 ## <u>Step 3</u>:<br>This is required for the Project to work.

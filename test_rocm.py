@@ -33,6 +33,7 @@ try:
                 has_torch = False
     if has_torch:
         print('GOOD: PyTorch is working fine.')
+        print(f"(PyTorch version: {torch.__version__})")
     else:
         print('BAD: PyTorch is NOT working.')
 
