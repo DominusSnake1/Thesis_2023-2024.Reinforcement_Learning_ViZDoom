@@ -32,7 +32,12 @@ git clone https://github.com/Farama-Foundation/ViZDoom.git
 python ./test_rocm.py
 ```
 
-## <u>Step 5</u>:<br>Run the program.
+## <u>Step 5</u>:<br>Run the program in either training or testing mode.
+### * Training Mode.
 ```bash
-python ./main.py
+python ./main.py -mode Train
+```
+### * Testing Mode. (Pick a model from `Data/Train`)
+```bash
+python ./main.py -mode test -model #YOUR_MODEL_HERE
 ```

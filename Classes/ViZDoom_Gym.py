@@ -7,7 +7,7 @@ import cv2
 
 def grayscale(observation):
     gray = cv2.cvtColor(np.moveaxis(observation, 0, -1), cv2.COLOR_BGR2GRAY)
-    return gray
+    return gray.reshape((1, *gray.shape)).astype(np.uint8)
 
 
 class ViZDoom_Gym(Env):
@@ -35,18 +35,19 @@ class ViZDoom_Gym(Env):
             ammo = self.game.get_state().game_variables[0]
             info = ammo
         else:
-            state = np.zeros(self.observation_space.shape)
+            state = np.zeros(self.observation_space.shape, dtype=np.uint8)
             info = 0
 
-        info = {"info": info}
         done = self.game.is_episode_finished()
+        info = {"info": info}
+        truncated = False
 
-        return state, reward, done, info
+        return state, reward, done, truncated, info
 
-    def reset(self, seed=None):
+    def reset(self, seed=None, options=None):
         self.game.new_episode()
         state = self.game.get_state().screen_buffer
-        return grayscale(state)
+        return grayscale(state), 0
 
     def close(self):
         self.game.close()
