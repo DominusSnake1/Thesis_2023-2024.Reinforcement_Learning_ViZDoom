@@ -14,6 +14,7 @@ class ViZDoom_Gym(Env):
     def __init__(self, level, render=False):
         super().__init__()
         self.game = vzd.DoomGame()
+        self.game.set_doom_game_path('Utils/DOOM2.WAD')
         self.game.load_config(f'ViZDoom/scenarios/{level}.cfg')
 
         if not render:

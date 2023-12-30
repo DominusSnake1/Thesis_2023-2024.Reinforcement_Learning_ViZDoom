@@ -4,3 +4,6 @@ gymnasium
 stable-baselines3[extra]
 nvidia-ml-py
 vizdoom
+torch --index-url https://download.pytorch.org/whl/rocm5.6
+torchvision --index-url https://download.pytorch.org/whl/rocm5.6
+torchaudio --index-url https://download.pytorch.org/whl/rocm5.6

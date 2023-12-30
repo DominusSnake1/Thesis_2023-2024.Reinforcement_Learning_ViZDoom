@@ -16,10 +16,7 @@ conda activate DoomPy39
 
 ## <u>Step 2</u>:<br>Install the required packages.
 ```bash
-pip install -r requirements.txt
-```
-```bash
-pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm5.6
+pip3 install -r requirements.txt
 ```
 
 ## <u>Step 3</u>:<br>This is required for the Project to work.
@@ -29,15 +26,15 @@ git clone https://github.com/Farama-Foundation/ViZDoom.git
 
 ## <u>Step 4</u>:<br>Run the PyTorch/ROCM test script.
 ```bash
-python ./test_rocm.py
+python ./Utils/test_rocm.py
 ```
 
 ## <u>Step 5</u>:<br>Run the program in either training or testing mode.
 ### * Training Mode.
 ```bash
-python ./main.py -mode Train
+python ./main.py -mode train
 ```
 ### * Testing Mode. (Pick a model from `Data/Train`)
 ```bash
-python ./main.py -mode test -model #YOUR_MODEL_HERE
+python ./main.py -mode test -model YOUR_MODEL_HERE
 ```
