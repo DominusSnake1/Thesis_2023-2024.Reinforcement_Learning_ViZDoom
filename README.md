@@ -34,7 +34,7 @@ python ./Utils/test_rocm.py
 ```bash
 python ./main.py -mode train
 ```
-### * Testing Mode. (Pick a model from `Data/Train`)
+### * Testing Mode. (Pick a model from `Data/Train/PICKYOURLEVEL`)
 ```bash
 python ./main.py -mode test -model YOUR_MODEL_HERE
 ```
