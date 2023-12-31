@@ -16,7 +16,7 @@ conda activate DoomPy39
 
 ## <u>Step 2</u>:<br>Install the required packages.
 ```bash
-pip3 install -r requirements.txt
+pip3 install -r ./Utils/requirements.txt
 ```
 
 ## <u>Step 3</u>:<br>This is required for the Project to work.
@@ -32,9 +32,9 @@ python ./Utils/test_rocm.py
 ## <u>Step 5</u>:<br>Run the program in either training or testing mode.
 ### * Training Mode.
 ```bash
-python ./main.py -mode train
+python ./main.py -level SELECT_LEVEL -mode train
 ```
 ### * Testing Mode. (Pick a model from `Data/Train/PICKYOURLEVEL`)
 ```bash
-python ./main.py -mode test -model YOUR_MODEL_HERE
+python ./main.py -level SELECT_LEVEL -mode test -model YOUR_MODEL_HERE -eps X
 ```

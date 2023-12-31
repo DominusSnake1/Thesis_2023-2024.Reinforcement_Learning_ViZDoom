@@ -16,6 +16,7 @@ class Doom_PPO:
         print('(If you wish to stop training sooner, just press CTRL+C)\n')
 
         doom = ViZDoom_Gym(self.level)
+
         model = PPO('CnnPolicy', env=doom, tensorboard_log=self.log_dir, verbose=verbose,
                     learning_rate=learning_rate, n_steps=n_steps, device=device)
 
@@ -23,7 +24,7 @@ class Doom_PPO:
 
         doom.close()
 
-    def myTest(self, model_num):
+    def myTest(self, model_num, episodes):
         doom = ViZDoom_Gym(self.level, True)
 
         model = PPO.load(f'./Data/Train/train_{self.level}/{model_num}')
@@ -32,7 +33,7 @@ class Doom_PPO:
         # print('mean_reward: ', mean_reward)
 
         avg_model_score = 0
-        for episode in range(5):
+        for episode in range(episodes):
             obs = doom.reset()
             done = False
             total_reward = 0
@@ -44,10 +45,10 @@ class Doom_PPO:
                 obs, reward, done, _, info = doom.step(action)
                 time.sleep(0.05)
                 total_reward += reward
-            print(f"Total reward for episode {episode} is {total_reward}")
+            print(f"Episode \'{episode+1}\' reward: {total_reward} pts")
             avg_model_score += total_reward
             time.sleep(1)
-        avg_model_score /= 5
-        print(f"Average reward for these 5 episodes is: {avg_model_score}")
+        avg_model_score /= episodes
+        print(f"Average reward for these {episodes} episodes is: {avg_model_score} pts")
 
         doom.close()
