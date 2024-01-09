@@ -16,7 +16,7 @@ conda activate DoomPy39
 
 ## <u>Step 2</u>:<br>Install the required packages.
 ```bash
-pip3 install -r ./Utils/requirements.txt
+pip3 install -r ./Other/requirements.txt
 ```
 
 ## <u>Step 3</u>:<br>This is required for the Project to work.
@@ -26,15 +26,19 @@ git clone https://github.com/Farama-Foundation/ViZDoom.git
 
 ## <u>Step 4</u>:<br>Run the PyTorch/ROCM test script.
 ```bash
-python ./Utils/test_rocm.py
+python ./Other/test_rocm.py
 ```
 
 ## <u>Step 5</u>:<br>Run the program in either training or testing mode.
 ### * Training Mode.
+You can also view real-time graphs of the training process by navigating to `Data/Logs/PICKYOURLEVEL/SELECTPPO`.
 ```bash
-python ./main.py -level SELECT_LEVEL -mode train
+gnome-terminal -- sh -c 'cd Data/Logs/ | tensorboard --logdir=.'
+```
+```bash
+python ./main.py -lvl SELECT_LEVEL -m train -alg YOUR_ALGORITHM
 ```
 ### * Testing Mode. (Pick a model from `Data/Train/PICKYOURLEVEL`)
 ```bash
-python ./main.py -level SELECT_LEVEL -mode test -model YOUR_MODEL_HERE -eps X
+python ./main.py -lvl SELECT_LEVEL -m test -alg YOUR_ALGORITHM -mdl YOUR_MODEL_HERE -eps X
 ```

@@ -1,58 +1,15 @@
-import sys
-import torch
-from Models.Doom_PPO import Doom_PPO
-
-
-def level_selector():
-    """
-    Takes the Level as an argument and prints the list of available levels if the selected level is unavailable.
-
-    :return: The selected level for training or testing.
-    """
-    args = sys.argv[1:]
-
-    levels = ['basic', 'defend_the_center', 'deadly_corridor']
-
-    if len(args) >= 2 and args[0] == '-level':
-        if (args[1] == 'SELECT_LEVEL') or (args[1] not in levels):
-            raise Exception('Please select a level/scenario from the list:\n'
-                            '1. basic\n'
-                            '2. defend_the_center\n'
-                            '3. deadly_corridor\n')
-
-        return args[1]
-
-
-def mode_selector():
-    """
-    Takes the "mode", "model" and "episode number" as an argument.
-
-    :return: Training/Testing Mode, Model and Number of Episodes
-    """
-    args = sys.argv[1:]
-
-    # Training Mode
-    if len(args) == 4 and args[2] == '-mode' and args[3] == 'train':
-        return 'train', -1, -1
-
-    # Testing Mode
-    if len(args) == 8 and args[2] == '-mode' and args[3] == 'test' and args[4] == '-model' and args[6] == '-eps':
-        if args[5] == 'YOUR_MODEL_HERE':
-            raise Exception('Please specify the model name! (Pick from `Data/Train`)')
-
-        if (args[7] == 'X') or (args[7] <= '0'):
-            raise Exception('Please provide a positive number of episodes.')
-
-        return 'test', args[5], int(args[7])
-
-    raise Exception("Please pick a mode from 'train' or 'test'!")
+from Models.Doom_Models import Doom_Models
+from Other import Utils
 
 
 class Doom_Levels:
     def __init__(self):
-        self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-        self.level = level_selector()
-        self.mode, self.test_model, self.episodes = mode_selector()
+        self.level = Utils.level_selector()
+        self.mode = Utils.mode_selector()
+        self.algorithm = Utils.algorithm_selector()
+
+        if self.mode == 'test':
+            self.model, self.episodes = Utils.modelAndEpisodes_selector()
 
     def basic(self):
         """
@@ -65,12 +22,22 @@ class Doom_Levels:
               "player can only (config) go left/right and shoot. 1 hit is enough to kill the monster. The episode "
               "finishes when the monster is killed or on timeout.\n")
 
-        model = Doom_PPO(level='basic')
+        model = Doom_Models(level=self.level)
 
         if self.mode == 'train':
-            model.myTrain(self.device, verbose=1, learning_rate=0.0001, n_steps=2048, total_timesteps=100000)
-        elif self.mode == 'test':
-            model.myTest(self.test_model, episodes=self.episodes)
+            policy_args = None
+            timesteps = 100000
+
+            if self.algorithm == 'PPO':
+                policy_args = {'learning_rate': 0.0001, 'n_steps': 2048}
+
+            model.myTrain(algorithm=self.algorithm, total_timesteps=timesteps, policy_used='CnnPolicy',
+                          arguments=policy_args)
+            return
+
+        if self.mode == 'test':
+            model.myTest(algorithm=self.algorithm, model_num=self.model, episodes=self.episodes)
+            return
 
     def defend_the_center(self):
         """
@@ -82,12 +49,22 @@ class Doom_Levels:
               "along the wall. Monsters are killed after a single shot. After dying, each monster is respawned after "
               "some time. The episode ends when the player dies (it’s inevitable because of limited ammo).\n")
 
-        model = Doom_PPO(level='defend_the_center')
+        model = Doom_Models(level=self.level)
 
         if self.mode == 'train':
-            model.myTrain(self.device, verbose=1, learning_rate=0.0001, n_steps=2048, total_timesteps=100000)
-        elif self.mode == 'test':
-            model.myTest(self.test_model, episodes=self.episodes)
+            policy_args = None
+            timesteps = 100000
+
+            if self.algorithm == 'PPO':
+                policy_args = {'learning_rate': 0.00001, 'n_steps': 2048}
+
+            model.myTrain(algorithm=self.algorithm, total_timesteps=timesteps, policy_used='CnnPolicy',
+                          arguments=policy_args)
+            return
+
+        if self.mode == 'test':
+            model.myTest(algorithm=self.algorithm, model_num=self.model, episodes=self.episodes)
+            return
 
     def deadly_corridor(self):
         print("\nDescription:\n"
@@ -96,9 +73,25 @@ class Doom_Levels:
               "change in the distance between the player and the vest. If the player ignores monsters on the sides "
               "and runs straight for the vest, he will be killed somewhere along the way.\n")
 
-        model = Doom_PPO(level='deadly_corridor')
+        model = Doom_Models(level=self.level, adjustments=True)
 
         if self.mode == 'train':
-            model.myTrain(self.device, verbose=1, learning_rate=0.0001, n_steps=2048, total_timesteps=100000)
-        elif self.mode == 'test':
-            model.myTest(self.test_model, episodes=self.episodes)
+            policy_args = None
+            policy = None
+            timesteps = 200000
+
+            if self.algorithm == 'PPO':
+                policy = 'CnnPolicy'
+                policy_args = {'learning_rate': 0.00001, 'n_steps': 4096,
+                               'clip_range': 0.1, 'gamma': 0.95, 'gae_lambda': 0.9}
+            elif self.algorithm == 'DQN':
+                policy = 'CnnPolicy'
+                policy_args = {'learning_rate': 0.0001, 'buffer_size': 10_000, 'batch_size': 32}
+
+            model.myTrain(algorithm=self.algorithm, total_timesteps=timesteps, policy_used=policy,
+                          arguments=policy_args)
+            return
+
+        if self.mode == 'test':
+            model.myTest(algorithm=self.algorithm, model_num=self.model, episodes=self.episodes)
+            return

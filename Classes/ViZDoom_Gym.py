@@ -11,24 +11,26 @@ def grayscale(observation):
 
 
 class ViZDoom_Gym(Env):
-    def __init__(self, level, render=False):
+    def __init__(self, level, render=False, adjustments=False):
         super().__init__()
         self.level = level
+        self.adjustments = adjustments
         self.game = vzd.DoomGame()
-        self.game.set_doom_game_path('Utils/DOOM2.WAD')
+        self.game.set_doom_game_path('Other/DOOM2.WAD')
         self.game.load_config(f'ViZDoom/scenarios/{level}.cfg')
 
-        self.__level_adjustments()
+        if self.adjustments:
+            self.__level_adjustments()
 
         if not render:
             self.game.set_window_visible(False)
         else:
             self.game.set_window_visible(True)
 
-        self.game.init()
         self.observation_space = Box(low=0, high=255, shape=(3, 240, 320), dtype=np.uint8)
         self.action_space = Discrete(self.game.get_available_buttons_size())
         self.actions = np.identity(self.game.get_available_buttons_size(), dtype=np.uint8)
+        self.game.init()
 
     def print_available_game_variables(self):
         print(self.game.get_available_game_variables())
@@ -36,25 +38,33 @@ class ViZDoom_Gym(Env):
     def __level_adjustments(self):
         if self.level == 'deadly_corridor':
             self.game.add_available_game_variable(vzd.DAMAGE_TAKEN)
-            self.game.add_available_game_variable(vzd.HITCOUNT)
+            self.game.add_available_game_variable(vzd.KILLCOUNT)
             self.game.add_available_game_variable(vzd.SELECTED_WEAPON_AMMO)
+            # self.game.set_living_reward(-1)
 
             setattr(self, 'damage_taken', 0)
-            setattr(self, 'hitcount', 0)
+            setattr(self, 'killcount', 0)
             setattr(self, 'ammo', 52)
 
     def __reward_shaping(self, game_variables):
         if self.level == 'deadly_corridor':
-            health, damage_taken, hitcount, ammo = game_variables
+            health, damage_taken, killcount, ammo = game_variables
+            print(f"HEALTH:{health}, DMG_TAKEN:{damage_taken}, KILLS:{killcount}, AMMO:{ammo}")
 
-            damage_taken_delta = -damage_taken + self.damage_taken
+            damage_taken_delta = damage_taken - self.damage_taken
             self.damage_taken = damage_taken
-            hitcount_delta = hitcount - self.hitcount
-            self.hitcount = hitcount
-            ammo_delta = ammo - self.ammo
+            killcount_delta = killcount - self.killcount
+            self.killcount = killcount
+            if ammo == 8:
+                self.ammo = ammo
+            ammo_delta = self.ammo - ammo
             self.ammo = ammo
 
-            return damage_taken_delta * 10 + hitcount_delta * 200 + ammo_delta * 5
+            damage_taken_coef = -2
+            killcount_coef = 100
+            ammo_coef = -1
+
+            return (damage_taken_delta * damage_taken_coef) + (killcount_delta * killcount_coef) + (ammo_delta * ammo_coef)
         else:
             return 0
 
@@ -66,7 +76,8 @@ class ViZDoom_Gym(Env):
             state = grayscale(state)
 
             info = self.game.get_state().game_variables
-            reward += self.__reward_shaping(info)
+            if self.adjustments:
+                reward += self.__reward_shaping(info)
         else:
             state = np.zeros(self.observation_space.shape, dtype=np.uint8)
             info = 0
