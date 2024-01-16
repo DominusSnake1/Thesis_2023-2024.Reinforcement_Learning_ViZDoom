@@ -1,5 +1,6 @@
 from Classes.TrainAndLog_Callback import TrainAndLog_Callback
 from Classes.ViZDoom_Gym import ViZDoom_Gym
+from Other.Utils import timer
 import numpy as np
 import torch
 import time
@@ -12,6 +13,7 @@ class Doom_Models:
         self.adjustments = adjustments
         self.log_dir = f'./Data/Logs/log_{level}'
 
+    @timer
     def myTrain(self, algorithm, policy_used, arguments, total_timesteps):
         callback = TrainAndLog_Callback(model_name=algorithm, check_freq=10000, level=self.level,
                                         adjustments=self.adjustments)

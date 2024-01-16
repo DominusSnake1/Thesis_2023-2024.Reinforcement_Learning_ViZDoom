@@ -1,4 +1,16 @@
 import sys
+import time
+
+
+def timer(function):
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        function(*args, **kwargs)
+        end = time.time()
+        time_elapsed = round(end - start, 2)
+        print(f"Training finished in {time_elapsed} seconds.")
+
+    return wrapper
 
 
 def level_selector():
