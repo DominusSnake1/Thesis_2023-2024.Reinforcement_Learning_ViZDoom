@@ -82,7 +82,7 @@ class Doom_Levels:
 
             if self.algorithm == 'PPO':
                 policy = 'CnnPolicy'
-                policy_args = {'learning_rate': 0.00001, 'n_steps': 4096,
+                policy_args = {'learning_rate': 0.00001, 'n_steps': 8192,
                                'clip_range': 0.1, 'gamma': 0.95, 'gae_lambda': 0.9}
             elif self.algorithm == 'DQN':
                 policy = 'CnnPolicy'
@@ -95,3 +95,50 @@ class Doom_Levels:
         if self.mode == 'test':
             model.myTest(algorithm=self.algorithm, model_num=self.model, episodes=self.episodes)
             return
+
+    def deathmatch(self):
+        print("\nDescription:\n"
+              "In this scenario, the agent is spawned in the random place of the arena filled with "
+              "resources. A random monster is spawned every few seconds that will try to kill the player. The reward "
+              "for killing a monster depends on its difficulty. The aim of the agent is to kill as many monsters as "
+              "possible before the time runs out or it’s killed by monsters.\n")
+
+        model = Doom_Models(level=self.level)
+
+        if self.mode == 'train':
+            policy_args = None
+            policy = None
+            timesteps = 200000
+
+            if self.algorithm == 'PPO':
+                policy = 'CnnPolicy'
+                policy_args = {'learning_rate': 0.00001, 'n_steps': 4096}
+            elif self.algorithm == 'DQN':
+                policy = 'CnnPolicy'
+                policy_args = {'learning_rate': 0.0001, 'buffer_size': 10_000, 'batch_size': 32}
+
+            model.myTrain(algorithm=self.algorithm, total_timesteps=timesteps, policy_used=policy,
+                          arguments=policy_args)
+            return
+
+        if self.mode == 'test':
+            model.myTest(algorithm=self.algorithm, model_num=self.model, episodes=self.episodes)
+            return
+
+    def defend_the_line(self):
+        pass
+
+    def health_gathering(self):
+        pass
+
+    def health_gathering_supreme(self):
+        pass
+
+    def my_way_home(self):
+        pass
+
+    def predict_position(self):
+        pass
+
+    def take_cover(self):
+        pass

@@ -10,6 +10,10 @@ def main():
         DOOM.defend_the_center()
     elif DOOM.level == 'deadly_corridor':
         DOOM.deadly_corridor()
+    elif DOOM.level == 'deathmatch':
+        DOOM.deathmatch()
+    elif DOOM.level == 'defend_the_line':
+        DOOM.defend_the_line()
 
 
 if __name__ == '__main__':

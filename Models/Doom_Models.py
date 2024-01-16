@@ -7,11 +7,12 @@ import time
 
 
 class Doom_Models:
-    def __init__(self, level, adjustments=False):
+    def __init__(self, level, adjustments=False, render=False):
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         self.level = level
         self.adjustments = adjustments
         self.log_dir = f'./Data/Logs/log_{level}'
+        self.render = render
 
     @timer
     def myTrain(self, algorithm, policy_used, arguments, total_timesteps):
@@ -21,7 +22,7 @@ class Doom_Models:
         print('Starting training...')
         print('(If you wish to stop training sooner, just press CTRL+C)\n')
 
-        doom = ViZDoom_Gym(self.level, adjustments=self.adjustments)
+        doom = ViZDoom_Gym(self.level, adjustments=self.adjustments, render=self.render)
         model = None
 
         if algorithm == 'PPO':

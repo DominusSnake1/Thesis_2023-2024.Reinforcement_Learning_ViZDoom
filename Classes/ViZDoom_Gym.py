@@ -60,9 +60,9 @@ class ViZDoom_Gym(Env):
             ammo_delta = self.ammo - ammo
             self.ammo = ammo
 
-            damage_taken_coef = -2
-            killcount_coef = 100
-            ammo_coef = -1
+            damage_taken_coef = -10
+            killcount_coef = 200
+            ammo_coef = -5
 
             return (damage_taken_delta * damage_taken_coef) + (killcount_delta * killcount_coef) + (ammo_delta * ammo_coef)
         else:

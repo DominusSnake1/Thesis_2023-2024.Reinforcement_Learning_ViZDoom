@@ -1,5 +1,6 @@
-import sys
+from datetime import timedelta
 import time
+import sys
 
 
 def timer(function):
@@ -8,14 +9,15 @@ def timer(function):
         function(*args, **kwargs)
         end = time.time()
         time_elapsed = round(end - start, 2)
-        print(f"Training finished in {time_elapsed} seconds.")
+        time_elapsed = timedelta(seconds=time_elapsed)
+        print(f"Training finished in {time_elapsed} (hh:mm:ss).")
 
     return wrapper
 
 
 def level_selector():
     args = sys.argv[1:]
-    levels = ['basic', 'defend_the_center', 'deadly_corridor']
+    levels = ['basic', 'defend_the_center', 'deadly_corridor', 'deathmatch', 'defend_the_line']
 
     if args[0] != '-lvl':
         raise Exception('In order to choose a level you must use \'-lvl\' after ./main.py.')
@@ -24,7 +26,9 @@ def level_selector():
         raise Exception('Please select a level/scenario from the list:\n'
                         '1. basic\n'
                         '2. defend_the_center\n'
-                        '3. deadly_corridor\n')
+                        '3. deadly_corridor\n'
+                        '4. deathmatch\n'
+                        '5, defend_the_line\n')
 
     return args[1]
 
