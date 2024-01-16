@@ -1,6 +1,6 @@
 ## System Information
 OS: Ubuntu 22.04.3 LTS<br>
-GPU: AMD® Radeon RX 6900 XT<br>
+GPU: AMD® Radeon RX 6900 XT 16 GB<br>
 CPU: Intel® Core™ i7-13700K<br>
 RAM: 32 GB DDR5 <br>
 
