@@ -27,7 +27,7 @@ class TrainAndLog_Callback(BaseCallback):
         mod = self.n_calls % self.check_freq
         div = int(self.n_calls / self.check_freq)
 
-        if (mod == 0) and (div % 2 == 0):
+        if mod == 0:
             model_path = os.path.join(self.save_path, f'{self.model_name}_{div * 10}')
 
             if self.adjustments:

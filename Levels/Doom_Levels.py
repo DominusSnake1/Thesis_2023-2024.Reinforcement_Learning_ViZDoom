@@ -78,16 +78,20 @@ class Doom_Levels:
         if self.mode == 'train':
             policy_args = None
             policy = None
-            timesteps = 200000
+            timesteps = 250000
 
             if self.algorithm == 'PPO':
                 policy = 'CnnPolicy'
-                policy_args = {'learning_rate': 0.00001, 'n_steps': 8192,
-                               'clip_range': 0.1, 'gamma': 0.95, 'gae_lambda': 0.9}
+                policy_args = {'learning_rate': 0.00001,
+                               'n_steps': 4096,
+                               'ent_coef': 1000}
+
             elif self.algorithm == 'DQN':
                 policy = 'CnnPolicy'
-                policy_args = {'learning_rate': 0.0001, 'buffer_size': 10_000,
-                               'batch_size': 32, 'exploration_fraction': 0.5}
+                policy_args = {'learning_rate': 0.0001,
+                               'buffer_size': 10_000,
+                               'batch_size': 32,
+                               'exploration_fraction': 0.5}
 
             model.myTrain(algorithm=self.algorithm, total_timesteps=timesteps, policy_used=policy,
                           arguments=policy_args)
