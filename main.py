@@ -14,6 +14,16 @@ def main():
         DOOM.deathmatch()
     elif DOOM.level == 'defend_the_line':
         DOOM.defend_the_line()
+    elif DOOM.level == 'health_gathering':
+        DOOM.health_gathering()
+    elif DOOM.level == 'health_gathering_supreme':
+        DOOM.health_gathering_supreme()
+    elif DOOM.level == 'my_way_home':
+        DOOM.my_way_home()
+    elif DOOM.level == 'predict_position':
+        DOOM.predict_position()
+    elif DOOM.level == 'take_cover':
+        DOOM.take_cover()
 
 
 if __name__ == '__main__':

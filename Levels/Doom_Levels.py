@@ -86,7 +86,8 @@ class Doom_Levels:
                                'clip_range': 0.1, 'gamma': 0.95, 'gae_lambda': 0.9}
             elif self.algorithm == 'DQN':
                 policy = 'CnnPolicy'
-                policy_args = {'learning_rate': 0.0001, 'buffer_size': 10_000, 'batch_size': 32}
+                policy_args = {'learning_rate': 0.0001, 'buffer_size': 10_000,
+                               'batch_size': 32, 'exploration_fraction': 0.5}
 
             model.myTrain(algorithm=self.algorithm, total_timesteps=timesteps, policy_used=policy,
                           arguments=policy_args)
