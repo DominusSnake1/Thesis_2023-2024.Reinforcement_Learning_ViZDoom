@@ -12,17 +12,13 @@ class Doom_Levels:
             self.model, self.episodes = Utils.modelAndEpisodes_selector()
 
     def basic(self):
-        """
-        Loads the `basic` level in either Training or "Testing mode"
-        as well as give a simple description of the level.
-        """
         print("\nDescription:\n"
               "The map is a rectangle with gray walls, ceiling, and floor. The player is spawned along the longer "
               "wall in the center. A red, circular monster is spawned randomly somewhere along the opposite wall. A "
               "player can only (config) go left/right and shoot. 1 hit is enough to kill the monster. The episode "
               "finishes when the monster is killed or on timeout.\n")
 
-        model = Doom_Models(level=self.level)
+        model = Doom_Models(level=self.level, algorithm=self.algorithm)
 
         if self.mode == 'train':
             policy_args = None
@@ -31,25 +27,20 @@ class Doom_Levels:
             if self.algorithm == 'PPO':
                 policy_args = {'learning_rate': 0.0001, 'n_steps': 2048}
 
-            model.myTrain(algorithm=self.algorithm, total_timesteps=timesteps, policy_used='CnnPolicy',
-                          arguments=policy_args)
+            model.myTrain(total_timesteps=timesteps, policy_used='CnnPolicy', arguments=policy_args)
             return
 
         if self.mode == 'test':
-            model.myTest(algorithm=self.algorithm, model_num=self.model, episodes=self.episodes)
+            model.myTest(model_num=self.model, episodes=self.episodes)
             return
 
     def defend_the_center(self):
-        """
-        Loads the `defend_the_center` level in either "Training" or "Testing" mode
-        as well as give a simple description of the level.
-        """
         print("\nDescription:\n"
               "The map is a large circle. A player is spawned in the exact center. 5 melee-only, monsters are spawned "
               "along the wall. Monsters are killed after a single shot. After dying, each monster is respawned after "
               "some time. The episode ends when the player dies (it’s inevitable because of limited ammo).\n")
 
-        model = Doom_Models(level=self.level)
+        model = Doom_Models(level=self.level, algorithm=self.algorithm)
 
         if self.mode == 'train':
             policy_args = None
@@ -58,12 +49,11 @@ class Doom_Levels:
             if self.algorithm == 'PPO':
                 policy_args = {'learning_rate': 0.00001, 'n_steps': 2048}
 
-            model.myTrain(algorithm=self.algorithm, total_timesteps=timesteps, policy_used='CnnPolicy',
-                          arguments=policy_args)
+            model.myTrain(total_timesteps=timesteps, policy_used='CnnPolicy', arguments=policy_args)
             return
 
         if self.mode == 'test':
-            model.myTest(algorithm=self.algorithm, model_num=self.model, episodes=self.episodes)
+            model.myTest(model_num=self.model, episodes=self.episodes)
             return
 
     def deadly_corridor(self):
@@ -73,7 +63,7 @@ class Doom_Levels:
               "change in the distance between the player and the vest. If the player ignores monsters on the sides "
               "and runs straight for the vest, he will be killed somewhere along the way.\n")
 
-        model = Doom_Models(level=self.level, adjustments=True)
+        model = Doom_Models(level=self.level, algorithm=self.algorithm, adjustments=True, use_curriculum=True)
 
         if self.mode == 'train':
             policy_args = None
@@ -84,7 +74,7 @@ class Doom_Levels:
                 policy = 'CnnPolicy'
                 policy_args = {'learning_rate': 0.00001,
                                'n_steps': 4096,
-                               'ent_coef': 1000}
+                               'ent_coef': 0.001}
 
             elif self.algorithm == 'DQN':
                 policy = 'CnnPolicy'
@@ -93,12 +83,11 @@ class Doom_Levels:
                                'batch_size': 32,
                                'exploration_fraction': 0.5}
 
-            model.myTrain(algorithm=self.algorithm, total_timesteps=timesteps, policy_used=policy,
-                          arguments=policy_args)
+            model.myTrain(total_timesteps=timesteps, policy_used=policy, arguments=policy_args)
             return
 
         if self.mode == 'test':
-            model.myTest(algorithm=self.algorithm, model_num=self.model, episodes=self.episodes)
+            model.myTest(model_num=self.model, episodes=self.episodes)
             return
 
     def deathmatch(self):
@@ -108,7 +97,7 @@ class Doom_Levels:
               "for killing a monster depends on its difficulty. The aim of the agent is to kill as many monsters as "
               "possible before the time runs out or it’s killed by monsters.\n")
 
-        model = Doom_Models(level=self.level)
+        model = Doom_Models(level=self.level, algorithm=self.algorithm)
 
         if self.mode == 'train':
             policy_args = None
@@ -122,16 +111,51 @@ class Doom_Levels:
                 policy = 'CnnPolicy'
                 policy_args = {'learning_rate': 0.0001, 'buffer_size': 10_000, 'batch_size': 32}
 
-            model.myTrain(algorithm=self.algorithm, total_timesteps=timesteps, policy_used=policy,
+            model.myTrain(total_timesteps=timesteps, policy_used=policy,
                           arguments=policy_args)
             return
 
         if self.mode == 'test':
-            model.myTest(algorithm=self.algorithm, model_num=self.model, episodes=self.episodes)
+            model.myTest(model_num=self.model, episodes=self.episodes)
             return
 
     def defend_the_line(self):
-        pass
+        print("\nDescription:\n"
+              "The purpose of this scenario is to teach an agent that killing the monsters is GOOD and when monsters"
+              "kill you is BAD. In addition, wasting ammunition is not very good either."
+              "The agent is rewarded only for killing monsters, so it has to figure out the rest for itself."
+
+              "The map is a rectangle. A player is spawned along the longer wall in the center. 3 melee-only and 3 "
+              "shooting monsters are spawned along the opposite wall. Monsters are killed after a single shot, "
+              "at first. After dying, each monster is respawned after some time and can endure more damage. The "
+              "episode ends when the player dies (it’s inevitable because of limited ammo).\n")
+
+        model = Doom_Models(level=self.level, algorithm=self.algorithm, adjustments=False, use_curriculum=False)
+
+        if self.mode == 'train':
+            policy_args = None
+            policy = None
+            timesteps = 250000
+
+            if self.algorithm == 'PPO':
+                policy = 'CnnPolicy'
+                policy_args = {'learning_rate': 0.00001,
+                               'n_steps': 4096,
+                               'ent_coef': 0.001}
+
+            elif self.algorithm == 'DQN':
+                policy = 'CnnPolicy'
+                policy_args = {'learning_rate': 0.0001,
+                               'buffer_size': 10_000,
+                               'batch_size': 32,
+                               'exploration_fraction': 0.5}
+
+            model.myTrain(total_timesteps=timesteps, policy_used=policy, arguments=policy_args)
+            return
+
+        if self.mode == 'test':
+            model.myTest(model_num=self.model, episodes=self.episodes)
+            return
 
     def health_gathering(self):
         pass
@@ -146,4 +170,7 @@ class Doom_Levels:
         pass
 
     def take_cover(self):
+        pass
+
+    def e1m1(self):
         pass

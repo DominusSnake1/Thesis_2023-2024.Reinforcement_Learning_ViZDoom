@@ -11,32 +11,31 @@ def grayscale(observation):
 
 
 class ViZDoom_Gym(Env):
-    def __init__(self, level, render=False, adjustments=False):
+    def __init__(self, level, render=False, adjustments=False, curriculum=False):
         super().__init__()
         self.level = level
-        self.adjustments = adjustments
+        self.use_adjustments = adjustments
+        self.use_curriculum = curriculum
         self.game = vzd.DoomGame()
         self.game.set_doom_game_path('Other/DOOM2.WAD')
-        self.game.load_config(f'ViZDoom/scenarios/{level}.cfg')
 
-        if self.adjustments:
+        if self.use_curriculum:
+            self.level = self.level[:-3]
+            cfg = f'Levels/LevelsCurriculum/{level}.cfg'
+        else:
+            cfg = f'ViZDoom/scenarios/{level}.cfg'
+
+        self.game.load_config(cfg)
+
+        if self.use_adjustments:
             self.__level_adjustments()
 
-        if not render:
-            self.game.set_window_visible(False)
-        else:
-            self.game.set_window_visible(True)
+        self.game.set_window_visible(render)
 
         self.observation_space = Box(low=0, high=255, shape=(3, 240, 320), dtype=np.uint8)
         self.action_space = Discrete(self.game.get_available_buttons_size())
         self.actions = np.identity(self.game.get_available_buttons_size(), dtype=np.uint8)
         self.game.init()
-
-    def __user_wants_adjustments(self):
-        if self.adjustments:
-            return True
-
-        return False
 
     def print_available_game_variables(self):
         print(self.game.get_available_game_variables())
@@ -52,14 +51,10 @@ class ViZDoom_Gym(Env):
             setattr(self, 'killcount', 0)
             setattr(self, 'ammo', 52)
 
-    def __reward_shaping(self, game_variables):
-        from Classes import RewardShaping
-        reward = 0
+    def __reward_shaping(self, game_variables: np.ndarray) -> int:
+        from Training import RewardShaping
 
-        if self.level == 'deadly_corridor':
-            reward = RewardShaping.deadly_corridor(self, game_variables)
-
-        return reward
+        return getattr(RewardShaping, self.level)(self, game_variables)
 
     def step(self, action):
         reward = self.game.make_action(self.actions[action], 4)
@@ -70,7 +65,7 @@ class ViZDoom_Gym(Env):
 
             info = self.game.get_state().game_variables
 
-            if self.__user_wants_adjustments():
+            if self.use_adjustments:
                 reward += self.__reward_shaping(info)
         else:
             state = np.zeros(self.observation_space.shape, dtype=np.uint8)

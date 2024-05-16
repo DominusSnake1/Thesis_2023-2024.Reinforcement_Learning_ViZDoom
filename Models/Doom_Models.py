@@ -1,4 +1,4 @@
-from Classes.TrainAndLog_Callback import TrainAndLog_Callback
+from Training.TrainAndLog_Callback import TrainAndLog_Callback
 from Classes.ViZDoom_Gym import ViZDoom_Gym
 from Other.Utils import timer
 import numpy as np
@@ -7,16 +7,18 @@ import time
 
 
 class Doom_Models:
-    def __init__(self, level, adjustments=False, render=False):
+    def __init__(self, level, algorithm, adjustments=False, use_curriculum=False, render=False):
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         self.level = level
+        self.algorithm = algorithm
         self.adjustments = adjustments
+        self.use_curriculum = use_curriculum
         self.log_dir = f'./Data/Logs/log_{level}'
         self.render = render
 
     @timer
-    def myTrain(self, algorithm, policy_used, arguments, total_timesteps):
-        callback = TrainAndLog_Callback(model_name=algorithm, check_freq=10000, level=self.level,
+    def myTrain(self, policy_used, arguments, total_timesteps):
+        callback = TrainAndLog_Callback(model_name=self.algorithm, check_freq=10000, level=self.level,
                                         adjustments=self.adjustments)
 
         print('Starting training...')
@@ -25,27 +27,31 @@ class Doom_Models:
         doom = ViZDoom_Gym(self.level, adjustments=self.adjustments, render=self.render)
         model = None
 
-        if algorithm == 'PPO':
+        if self.algorithm == 'PPO':
             from stable_baselines3 import PPO
             model = PPO(policy=policy_used, env=doom, tensorboard_log=self.log_dir,
                         device=self.device, **arguments, verbose=1)
-        elif algorithm == 'DQN':
+        elif self.algorithm == 'DQN':
             from stable_baselines3 import DQN
             model = DQN(policy=policy_used, env=doom, tensorboard_log=self.log_dir,
                         device=self.device, **arguments, verbose=1)
 
-        model.learn(total_timesteps=total_timesteps, callback=callback)
+        if not self.use_curriculum:
+            model.learn(total_timesteps=total_timesteps, callback=callback)
+        elif self.use_curriculum:
+            from Training import CurriculumLearning
+            CurriculumLearning.CurriculumLearning(self, level_name=self.level, model=model, callback=callback)
 
         doom.close()
 
-    def myTest(self, algorithm, model_num, episodes):
+    def myTest(self, model_num, episodes):
         doom = ViZDoom_Gym(self.level, render=True)
         model = None
 
-        if algorithm == 'PPO':
+        if self.algorithm == 'PPO':
             from stable_baselines3 import PPO
             model = PPO.load(f'./Data/Train/train_{self.level}/{model_num}')
-        elif algorithm == 'DQN':
+        elif self.algorithm == 'DQN':
             from stable_baselines3 import DQN
             model = DQN.load(f'./Data/Train/train_{self.level}/{model_num}')
 

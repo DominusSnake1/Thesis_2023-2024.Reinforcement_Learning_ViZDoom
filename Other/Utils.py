@@ -28,7 +28,7 @@ def level_selector():
                         '2. defend_the_center\n'
                         '3. deadly_corridor\n'
                         '4. deathmatch\n'
-                        '5, defend_the_line\n')
+                        '5. defend_the_line\n')
 
     return args[1]
 
