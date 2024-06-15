@@ -2,6 +2,9 @@ from Classes.ViZDoom_Gym import ViZDoom_Gym
 
 
 def deadly_corridor(self: ViZDoom_Gym, game_variables: list):
+    # The agent gets reward (0 - 1312 pts) according to his distance from the vest.
+    # The agent gets reward (1000 pts) if he reaches the vest.
+
     health, damage_taken, killcount, ammo = game_variables
     print(f"HEALTH:{health}, DMG_TAKEN:{damage_taken}, KILLS:{killcount}, AMMO:{ammo}")
 
@@ -16,8 +19,8 @@ def deadly_corridor(self: ViZDoom_Gym, game_variables: list):
     ammo_delta = self.ammo - ammo
     self.ammo = ammo
 
-    damage_taken_coef = -50
-    killcount_coef = 250
+    damage_taken_coef = -10
+    killcount_coef = 200
     ammo_coef = -2
 
     return (damage_taken_delta * damage_taken_coef) + (killcount_delta * killcount_coef) + (ammo_delta * ammo_coef)
