@@ -1,15 +1,16 @@
 from Models.Doom_Models import Doom_Models
-from Other import Utils
+from Training import Techniques
+from Other import CMD
 
 
 class Doom_Levels:
     def __init__(self):
-        self.level = Utils.level_selector()
-        self.mode = Utils.mode_selector()
-        self.algorithm = Utils.algorithm_selector()
+        self.level = CMD.level_selector()
+        self.technique = CMD.technique_selector()
+        self.mode = CMD.mode_selector()
 
         if self.mode == 'test':
-            self.model, self.episodes = Utils.modelAndEpisodes_selector()
+            self.model, self.episodes = CMD.modelAndEpisodes_selector()
 
     def basic(self):
         print("\nDescription:\n"
@@ -18,21 +19,19 @@ class Doom_Levels:
               "player can only (config) go left/right and shoot. 1 hit is enough to kill the monster. The episode "
               "finishes when the monster is killed or on timeout.\n")
 
-        model = Doom_Models(level=self.level, algorithm=self.algorithm)
+        selected_technique = None
+
+        if self.technique == 'PPO_Standard':
+            selected_technique = Techniques.PPO_Standard()
+        elif self.technique == 'PPO_RewardShaping':
+            selected_technique = Techniques.PPO_RewardShaping()
+
+        model = Doom_Models(level=self.level, technique=selected_technique)
 
         if self.mode == 'train':
-            policy_args = None
-            timesteps = 100000
-
-            if self.algorithm == 'PPO':
-                policy_args = {'learning_rate': 0.0001, 'n_steps': 2048}
-
-            model.myTrain(total_timesteps=timesteps, policy_used='CnnPolicy', arguments=policy_args)
-            return
-
-        if self.mode == 'test':
-            model.myTest(model_num=self.model, episodes=self.episodes)
-            return
+            model.myTrain(timesteps=100000)
+        elif self.mode == 'test':
+            model.myTest(model_name=self.model, episodes=self.episodes)
 
     def defend_the_center(self):
         print("\nDescription:\n"
@@ -40,21 +39,19 @@ class Doom_Levels:
               "along the wall. Monsters are killed after a single shot. After dying, each monster is respawned after "
               "some time. The episode ends when the player dies (it’s inevitable because of limited ammo).\n")
 
-        model = Doom_Models(level=self.level, algorithm=self.algorithm)
+        selected_technique = None
+
+        if self.technique == 'PPO_Standard':
+            selected_technique = Techniques.PPO_Standard(learning_rate=0.00001)
+        elif self.technique == 'PPO_RewardShaping':
+            selected_technique = Techniques.PPO_RewardShaping()
+
+        model = Doom_Models(level=self.level, technique=selected_technique)
 
         if self.mode == 'train':
-            policy_args = None
-            timesteps = 100000
-
-            if self.algorithm == 'PPO':
-                policy_args = {'learning_rate': 0.00001, 'n_steps': 2048}
-
-            model.myTrain(total_timesteps=timesteps, policy_used='CnnPolicy', arguments=policy_args)
-            return
-
-        if self.mode == 'test':
-            model.myTest(model_num=self.model, episodes=self.episodes)
-            return
+            model.myTrain(timesteps=100000)
+        elif self.mode == 'test':
+            model.myTest(model_name=self.model, episodes=self.episodes)
 
     def deadly_corridor(self):
         print("\nDescription:\n"
@@ -63,32 +60,27 @@ class Doom_Levels:
               "change in the distance between the player and the vest. If the player ignores monsters on the sides "
               "and runs straight for the vest, he will be killed somewhere along the way.\n")
 
-        model = Doom_Models(level=self.level, algorithm=self.algorithm, adjustments=True, use_curriculum=True)
+        selected_technique = None
+
+        if self.technique == 'PPO_Standard':
+            selected_technique = Techniques.PPO_Standard()
+        elif self.technique == 'PPO_RewardShaping':
+            selected_technique = Techniques.PPO_RewardShaping()
+
+        model = Doom_Models(level=self.level, technique=selected_technique)
 
         if self.mode == 'train':
-            policy_args = None
-            policy = None
-            timesteps = 250000
-
-            if self.algorithm == 'PPO':
-                policy = 'CnnPolicy'
-                policy_args = {'learning_rate': 0.00001,
-                               'n_steps': 4096,
-                               'ent_coef': 0.001}
-
-            elif self.algorithm == 'DQN':
-                policy = 'CnnPolicy'
-                policy_args = {'learning_rate': 0.0001,
-                               'buffer_size': 10_000,
-                               'batch_size': 32,
-                               'exploration_fraction': 0.5}
-
-            model.myTrain(total_timesteps=timesteps, policy_used=policy, arguments=policy_args)
-            return
-
-        if self.mode == 'test':
-            model.myTest(model_num=self.model, episodes=self.episodes)
-            return
+            model.myTrain(timesteps=250000)
+            # elif self.algorithm == 'DQN':
+            #     policy = 'CnnPolicy'
+            #     policy_args = {'learning_rate': 0.0001,
+            #                    'buffer_size': 10_000,
+            #                    'batch_size': 32,
+            #                    'exploration_fraction': 0.5}
+            #
+            # model.myTrain(total_timesteps=technique.timesteps, policy_used=policy, arguments=policy_args)
+        elif self.mode == 'test':
+            model.myTest(model_name=self.model, episodes=self.episodes)
 
     def deathmatch(self):
         print("\nDescription:\n"
@@ -97,27 +89,19 @@ class Doom_Levels:
               "for killing a monster depends on its difficulty. The aim of the agent is to kill as many monsters as "
               "possible before the time runs out or it’s killed by monsters.\n")
 
-        model = Doom_Models(level=self.level, algorithm=self.algorithm)
+        selected_technique = None
+
+        if self.technique == 'PPO_Standard':
+            selected_technique = Techniques.PPO_Standard(learning_rate=0.00001)
+        elif self.technique == 'PPO_RewardShaping':
+            selected_technique = Techniques.PPO_RewardShaping()
+
+        model = Doom_Models(level=self.level, technique=selected_technique)
 
         if self.mode == 'train':
-            policy_args = None
-            policy = None
-            timesteps = 200000
-
-            if self.algorithm == 'PPO':
-                policy = 'CnnPolicy'
-                policy_args = {'learning_rate': 0.00001, 'n_steps': 4096}
-            elif self.algorithm == 'DQN':
-                policy = 'CnnPolicy'
-                policy_args = {'learning_rate': 0.0001, 'buffer_size': 10_000, 'batch_size': 32}
-
-            model.myTrain(total_timesteps=timesteps, policy_used=policy,
-                          arguments=policy_args)
-            return
-
-        if self.mode == 'test':
-            model.myTest(model_num=self.model, episodes=self.episodes)
-            return
+            model.myTrain(timesteps=200000)
+        elif self.mode == 'test':
+            model.myTest(model_name=self.model, episodes=self.episodes)
 
     def defend_the_line(self):
         print("\nDescription:\n"
@@ -130,32 +114,19 @@ class Doom_Levels:
               "at first. After dying, each monster is respawned after some time and can endure more damage. The "
               "episode ends when the player dies (it’s inevitable because of limited ammo).\n")
 
-        model = Doom_Models(level=self.level, algorithm=self.algorithm, adjustments=False, use_curriculum=False)
+        selected_technique = None
+
+        if self.technique == 'PPO_Standard':
+            selected_technique = Techniques.PPO_Standard(learning_rate=0.00001)
+        elif self.technique == 'PPO_RewardShaping':
+            selected_technique = Techniques.PPO_RewardShaping()
+
+        model = Doom_Models(level=self.level, technique=selected_technique)
 
         if self.mode == 'train':
-            policy_args = None
-            policy = None
-            timesteps = 250000
-
-            if self.algorithm == 'PPO':
-                policy = 'CnnPolicy'
-                policy_args = {'learning_rate': 0.00001,
-                               'n_steps': 4096,
-                               'ent_coef': 0.001}
-
-            elif self.algorithm == 'DQN':
-                policy = 'CnnPolicy'
-                policy_args = {'learning_rate': 0.0001,
-                               'buffer_size': 10_000,
-                               'batch_size': 32,
-                               'exploration_fraction': 0.5}
-
-            model.myTrain(total_timesteps=timesteps, policy_used=policy, arguments=policy_args)
-            return
-
-        if self.mode == 'test':
-            model.myTest(model_num=self.model, episodes=self.episodes)
-            return
+            model.myTrain(timesteps=250000)
+        elif self.mode == 'test':
+            model.myTest(model_name=self.model, episodes=self.episodes)
 
     def health_gathering(self):
         pass

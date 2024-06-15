@@ -11,10 +11,10 @@ def grayscale(observation):
 
 
 class ViZDoom_Gym(Env):
-    def __init__(self, level, render=False, adjustments=False, curriculum=False):
+    def __init__(self, level, render=False, reward_shaping=False, curriculum=False):
         super().__init__()
         self.level = level
-        self.use_adjustments = adjustments
+        self.reward_shaping = reward_shaping
         self.use_curriculum = curriculum
         self.game = vzd.DoomGame()
         self.game.set_doom_game_path('Other/DOOM2.WAD')
@@ -27,7 +27,7 @@ class ViZDoom_Gym(Env):
 
         self.game.load_config(cfg)
 
-        if self.use_adjustments:
+        if self.reward_shaping:
             self.__level_adjustments()
 
         self.game.set_window_visible(render)
@@ -65,7 +65,7 @@ class ViZDoom_Gym(Env):
 
             info = self.game.get_state().game_variables
 
-            if self.use_adjustments:
+            if self.reward_shaping:
                 reward += self.__reward_shaping(info)
         else:
             state = np.zeros(self.observation_space.shape, dtype=np.uint8)

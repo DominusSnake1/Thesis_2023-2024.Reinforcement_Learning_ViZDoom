@@ -1,4 +1,4 @@
-from Training.TrainAndLog_Callback import get_formatted_datetime
+from Classes.TrainAndLog_Callback import get_formatted_datetime
 from Classes.ViZDoom_Gym import ViZDoom_Gym
 from Models.Doom_Models import Doom_Models
 import glob
@@ -21,7 +21,7 @@ def CurriculumLearning(self: Doom_Models, level_name, model, callback):
 
     for sub_level in sub_levels:
         print(f"\nTraining on sub-level: {sub_level}...")
-        env = ViZDoom_Gym(level=sub_level, adjustments=self.adjustments, render=self.render, curriculum=True)
+        env = ViZDoom_Gym(level=sub_level, reward_shaping=self.adjustments, render=self.render, curriculum=True)
         model.set_env(env)
         model.learn(total_timesteps=50000, callback=callback)
 

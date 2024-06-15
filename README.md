@@ -36,9 +36,9 @@ You can also view real-time graphs of the training process by navigating to `Dat
 gnome-terminal -- sh -c 'cd Data/Logs/ | tensorboard --logdir=.'
 ```
 ```bash
-python ./main.py -lvl SELECT_LEVEL -m train -alg YOUR_ALGORITHM
+python ./main.py -lvl SELECT_LEVEL -m train -t YOUR_TECHNIQUE
 ```
 ### * Testing Mode. (Pick a model from `Data/Train/PICKYOURLEVEL`)
 ```bash
-python ./main.py -lvl SELECT_LEVEL -m test -alg YOUR_ALGORITHM -mdl YOUR_MODEL_HERE -eps X
+python ./main.py -lvl SELECT_LEVEL -m test -t YOUR_TECHNIQUE -mdl YOUR_MODEL -eps X
 ```
