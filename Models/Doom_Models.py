@@ -56,6 +56,21 @@ class Doom_Models:
                         tensorboard_log=self.log_dir,
                         verbose=1)
 
+        elif self.technique.__class__.__name__ == 'PPO_ResNet':
+            from stable_baselines3 import PPO
+
+            doom = ViZDoom_Gym(self.level)
+
+            model = PPO(env=doom,
+                        policy=self.technique.policy,
+                        learning_rate=self.technique.learning_rate,
+                        policy_kwargs=self.technique.get_policy_kwargs(),
+                        n_steps=self.technique.n_steps,
+                        ent_coef=self.technique.ent_coef,
+                        device=self.device,
+                        tensorboard_log=self.log_dir,
+                        verbose=1)
+
         model.learn(total_timesteps=timesteps, callback=callback)
         doom.close()
 
@@ -64,6 +79,9 @@ class Doom_Models:
         model = None
 
         if self.technique.__class__.__name__ == 'PPO_Standard':
+            from stable_baselines3 import PPO
+            model = PPO.load(f'./Data/Train/train_{self.level}/{model_name}')
+        if self.technique.__class__.__name__ == 'PPO_ResNet':
             from stable_baselines3 import PPO
             model = PPO.load(f'./Data/Train/train_{self.level}/{model_name}')
 

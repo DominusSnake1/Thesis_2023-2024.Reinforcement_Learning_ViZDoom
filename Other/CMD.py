@@ -49,7 +49,7 @@ def mode_selector() -> str:
 
 def technique_selector() -> str:
     args = sys.argv[1:]
-    techniques = ['PPO_Standard', 'PPO_RewardShaping', 'PPO_CurriculumLearning']
+    techniques = ['PPO_Standard', 'PPO_RewardShaping', 'PPO_ResNet']
 
     if args[4] != '-t':
         raise Exception("In order to choose a technique you must use \'-t\' after selecting a mode.")

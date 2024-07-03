@@ -66,6 +66,8 @@ class Doom_Levels:
             selected_technique = Techniques.PPO_Standard()
         elif self.technique == 'PPO_RewardShaping':
             selected_technique = Techniques.PPO_RewardShaping()
+        elif self.technique == 'PPO_ResNet':
+            selected_technique = Techniques.PPO_ResNet()
 
         model = Doom_Models(level=self.level, technique=selected_technique)
 
