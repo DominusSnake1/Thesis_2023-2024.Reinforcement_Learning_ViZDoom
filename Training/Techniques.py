@@ -6,16 +6,12 @@ class PPO_Standard:
     The standard PPO technique for comparison. The base model with no changes.
     """
 
-    def __init__(self,
-                 policy: str = 'CnnPolicy',
-                 learning_rate: float = 0.0001,
-                 n_steps: int = 4096,
-                 ent_coef: float = 0.001):
-        self.policy = policy
-        self.learning_rate = learning_rate
-        self.n_steps = n_steps
-        self.ent_coef = ent_coef
+    def __init__(self):
         self.algorithm = 'PPO-S'
+        self.policy = 'CnnPolicy'
+        self.learning_rate = 0.0001
+        self.n_steps = 4096
+        self.ent_coef = 0.001
         self.reward_shaping = False
         self.curriculum_learning = False
 
@@ -25,16 +21,12 @@ class PPO_RewardShaping:
     This PPO model uses Reward Shaping to generate better results.
     """
 
-    def __init__(self,
-                 policy: str = 'CnnPolicy',
-                 learning_rate: float = 0.0001,
-                 n_steps: int = 4096,
-                 ent_coef: float = 0.001):
-        self.policy = policy
-        self.learning_rate = learning_rate
-        self.n_steps = n_steps
-        self.ent_coef = ent_coef
+    def __init__(self):
         self.algorithm = 'PPO-RS'
+        self.policy = 'CnnPolicy'
+        self.learning_rate = 0.0001
+        self.n_steps = 4096
+        self.ent_coef = 0.001
         self.reward_shaping = True
         self.curriculum_learning = False
 
@@ -44,21 +36,16 @@ class PPO_ResNet:
     This PPO model uses a custom ResNet for feature extraction.
     """
 
-    def __init__(self,
-                 policy=Training.ResNet50.CustomCnnPolicy,
-                 learning_rate: float = 0.0001,
-                 n_steps: int = 4096,
-                 ent_coef: float = 0.0001,
-                 features_dim: int = 512):
-
-        self.policy = policy
-        self.learning_rate = learning_rate
-        self.n_steps = n_steps
-        self.ent_coef = ent_coef
+    def __init__(self):
         self.algorithm = 'PPO-RN'
+        self.policy = Training.ResNet50.CustomCnnPolicy
+        self.learning_rate = 0.0001
+        self.n_steps = 2048
+        self.ent_coef = 0.001
+        self.clip_range = 0.2
+        self.features_dim = 512
         self.reward_shaping = False
         self.curriculum_learning = False
-        self.features_dim = features_dim
 
     def get_policy_kwargs(self):
         from Training.ResNet50 import ResNet50FeatureExtractor

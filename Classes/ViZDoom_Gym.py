@@ -1,8 +1,8 @@
-from gymnasium.spaces import Discrete, Box
-from gymnasium import Env
-import vizdoom as vzd
-import numpy as np
 import cv2
+import numpy as np
+import vizdoom as vzd
+from gymnasium import Env
+from gymnasium.spaces import Discrete, Box
 
 
 def grayscale(observation):
