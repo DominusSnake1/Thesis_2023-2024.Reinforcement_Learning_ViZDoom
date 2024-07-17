@@ -1,8 +1,9 @@
-import cv2
-import numpy as np
-import vizdoom as vzd
-from gymnasium import Env
 from gymnasium.spaces import Discrete, Box
+from gymnasium import Env
+import vizdoom as vzd
+import numpy as np
+import cv2
+from icecream import ic
 
 
 def grayscale(observation):
@@ -32,6 +33,7 @@ class ViZDoom_Gym(Env):
 
         self.game.set_window_visible(render)
 
+        self.game.set_screen_resolution(vzd.ScreenResolution.RES_320X240)
         self.observation_space = Box(low=0, high=255, shape=(3, 240, 320), dtype=np.uint8)
         self.action_space = Discrete(self.game.get_available_buttons_size())
         self.actions = np.identity(self.game.get_available_buttons_size(), dtype=np.uint8)
@@ -61,7 +63,7 @@ class ViZDoom_Gym(Env):
 
         if self.game.get_state():
             state = self.game.get_state().screen_buffer
-            state = grayscale(state)
+            # state = grayscale(state)
 
             info = self.game.get_state().game_variables
 
@@ -80,7 +82,8 @@ class ViZDoom_Gym(Env):
     def reset(self, seed=None, options=None):
         self.game.new_episode()
         state = self.game.get_state().screen_buffer
-        return grayscale(state), 0
+        return state, 0
+        # return grayscale(state), 0
 
     def close(self):
         self.game.close()

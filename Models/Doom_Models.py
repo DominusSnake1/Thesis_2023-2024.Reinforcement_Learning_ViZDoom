@@ -4,6 +4,7 @@ from Other.Utils import timer
 import numpy as np
 import torch
 import time
+from icecream import ic
 
 
 class Doom_Models:
@@ -93,7 +94,7 @@ class Doom_Models:
             while not done:
                 if isinstance(obs, tuple):
                     obs = obs[0]
-                obs = np.concatenate([obs] * 3, axis=0)
+                # obs = np.concatenate([obs] * 3, axis=0)
                 action, _ = model.predict(obs)
                 obs, reward, done, _, info = doom.step(action)
                 time.sleep(0.05)

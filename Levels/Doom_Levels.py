@@ -29,7 +29,8 @@ class Doom_Levels:
         model = Doom_Models(level=self.level, technique=selected_technique)
 
         if self.mode == 'train':
-            model.myTrain(timesteps=100000)
+            # model.myTrain(timesteps=100000)
+            model.myTrain(timesteps=250000)
         elif self.mode == 'test':
             model.myTest(model_name=self.model, episodes=self.episodes)
 
@@ -42,14 +43,15 @@ class Doom_Levels:
         selected_technique = None
 
         if self.technique == 'PPO_Standard':
-            selected_technique = Techniques.PPO_Standard(learning_rate=0.00001)
+            selected_technique = Techniques.PPO_Standard()
         elif self.technique == 'PPO_RewardShaping':
             selected_technique = Techniques.PPO_RewardShaping()
 
         model = Doom_Models(level=self.level, technique=selected_technique)
 
         if self.mode == 'train':
-            model.myTrain(timesteps=100000)
+            # model.myTrain(timesteps=100000)
+            model.myTrain(timesteps=250000)
         elif self.mode == 'test':
             model.myTest(model_name=self.model, episodes=self.episodes)
 
@@ -94,7 +96,7 @@ class Doom_Levels:
         selected_technique = None
 
         if self.technique == 'PPO_Standard':
-            selected_technique = Techniques.PPO_Standard(learning_rate=0.00001)
+            selected_technique = Techniques.PPO_Standard()
         elif self.technique == 'PPO_RewardShaping':
             selected_technique = Techniques.PPO_RewardShaping()
 
@@ -119,7 +121,7 @@ class Doom_Levels:
         selected_technique = None
 
         if self.technique == 'PPO_Standard':
-            selected_technique = Techniques.PPO_Standard(learning_rate=0.00001)
+            selected_technique = Techniques.PPO_Standard()
         elif self.technique == 'PPO_RewardShaping':
             selected_technique = Techniques.PPO_RewardShaping()
 

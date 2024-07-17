@@ -78,16 +78,16 @@ def modelAndEpisodes_selector() -> tuple:
     """
     args = sys.argv[1:]
 
-    if args[6] != '-mdl':
+    if (len(args) < 7) or (args[6] != '-mdl'):
         raise Exception("In order to choose a model you must use \'-mdl\' after selecting a technique.")
 
-    if args[7] == 'YOUR_MODEL_HERE':
+    if (len(args) < 8) or (args[7] == 'YOUR_MODEL_HERE'):
         raise Exception("Please select a model from the \'Data/Train/YOURCHOSENLEVEL/YOURCHOSENMODEL\'.")
 
-    if args[8] != '-eps':
+    if (len(args) < 9) or (args[8] != '-eps'):
         raise Exception("In order to choose how many episodes to test you must use \'-eps\' after selecting a model.")
 
-    if (args[9] == 'X') or (int(args[9]) <= 0):
+    if (len(args) < 10) or ((args[9] == 'X') or (int(args[9]) <= 0)):
         raise Exception("Please provide a positive number of episodes.")
 
     return args[7], int(args[9])
