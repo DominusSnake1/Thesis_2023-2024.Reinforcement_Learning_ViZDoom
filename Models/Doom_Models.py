@@ -79,10 +79,7 @@ class Doom_Models:
         doom = ViZDoom_Gym(self.level, render=True)
         model = None
 
-        if self.technique.__class__.__name__ == 'PPO_Standard':
-            from stable_baselines3 import PPO
-            model = PPO.load(f'./Data/Train/train_{self.level}/{model_name}')
-        if self.technique.__class__.__name__ == 'PPO_ResNet':
+        if self.technique.__class__.__name__ in ["PPO_Standard", "PPO_RewardShaping", "PPO_ResNet"]:
             from stable_baselines3 import PPO
             model = PPO.load(f'./Data/Train/train_{self.level}/{model_name}')
 

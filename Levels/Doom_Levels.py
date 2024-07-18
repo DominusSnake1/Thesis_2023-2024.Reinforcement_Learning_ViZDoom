@@ -67,7 +67,8 @@ class Doom_Levels:
         if self.technique == 'PPO_Standard':
             selected_technique = Techniques.PPO_Standard()
         elif self.technique == 'PPO_RewardShaping':
-            selected_technique = Techniques.PPO_RewardShaping()
+            # selected_technique = Techniques.PPO_RewardShaping()
+            selected_technique = Techniques.PPO_RewardShaping(ent_coef=0.0001)
         elif self.technique == 'PPO_ResNet':
             selected_technique = Techniques.PPO_ResNet()
 
