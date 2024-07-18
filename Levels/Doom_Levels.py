@@ -67,23 +67,16 @@ class Doom_Levels:
         if self.technique == 'PPO_Standard':
             selected_technique = Techniques.PPO_Standard()
         elif self.technique == 'PPO_RewardShaping':
-            # selected_technique = Techniques.PPO_RewardShaping()
-            selected_technique = Techniques.PPO_RewardShaping(ent_coef=0.0001)
+            # selected_technique = Techniques.PPO_RewardShaping()  # PPO_RS
+            selected_technique = Techniques.PPO_RewardShaping(ent_coef=0.01)  # PPO_RS-ent_coef, PPO_RS-ent_coef-timesteps
         elif self.technique == 'PPO_ResNet':
             selected_technique = Techniques.PPO_ResNet()
 
         model = Doom_Models(level=self.level, technique=selected_technique)
 
         if self.mode == 'train':
-            model.myTrain(timesteps=250000)
-            # elif self.algorithm == 'DQN':
-            #     policy = 'CnnPolicy'
-            #     policy_args = {'learning_rate': 0.0001,
-            #                    'buffer_size': 10_000,
-            #                    'batch_size': 32,
-            #                    'exploration_fraction': 0.5}
-            #
-            # model.myTrain(total_timesteps=technique.timesteps, policy_used=policy, arguments=policy_args)
+            # model.myTrain(timesteps=250000)  # PPO_RS, PPO_RS-ent_coef
+            model.myTrain(timesteps=500000)  # PPO_RS-ent_coef-timesteps
         elif self.mode == 'test':
             model.myTest(model_name=self.model, episodes=self.episodes)
 
