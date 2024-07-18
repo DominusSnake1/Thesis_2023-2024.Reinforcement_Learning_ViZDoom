@@ -30,7 +30,7 @@ class ViZDoom_Gym(Env):
 
         if self.reward_shaping:
             from Training import LevelAdjustments
-            getattr(LevelAdjustments, self.level)
+            getattr(LevelAdjustments, self.level)(self)
 
         self.game.set_window_visible(render)
 
