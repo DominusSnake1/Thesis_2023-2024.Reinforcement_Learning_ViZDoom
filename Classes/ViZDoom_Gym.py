@@ -29,7 +29,8 @@ class ViZDoom_Gym(Env):
         self.game.load_config(cfg)
 
         if self.reward_shaping:
-            self.__level_adjustments()
+            from Training import LevelAdjustments
+            getattr(LevelAdjustments, self.level)
 
         self.game.set_window_visible(render)
 
@@ -41,17 +42,6 @@ class ViZDoom_Gym(Env):
 
     def print_available_game_variables(self):
         print(self.game.get_available_game_variables())
-
-    def __level_adjustments(self):
-        if self.level == 'deadly_corridor':
-            self.game.add_available_game_variable(vzd.DAMAGE_TAKEN)
-            self.game.add_available_game_variable(vzd.KILLCOUNT)
-            self.game.add_available_game_variable(vzd.SELECTED_WEAPON_AMMO)
-            # self.game.set_living_reward(-1)
-
-            setattr(self, 'damage_taken', 0)
-            setattr(self, 'killcount', 0)
-            setattr(self, 'ammo', 52)
 
     def __reward_shaping(self, game_variables: np.ndarray) -> int:
         from Training import RewardShaping
