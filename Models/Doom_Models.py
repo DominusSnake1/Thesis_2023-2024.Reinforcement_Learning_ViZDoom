@@ -24,7 +24,7 @@ class Doom_Models:
         model = None
         doom = None
         callback = TrainAndLog_Callback(model_name=self.technique.algorithm,
-                                        check_freq=10000,
+                                        check_freq=50000,
                                         level=self.level,
                                         reward_shaping=self.technique.reward_shaping,
                                         curriculum=self.technique.curriculum_learning)
@@ -72,7 +72,7 @@ class Doom_Models:
                         tensorboard_log=self.log_dir,
                         verbose=1)
 
-        model.learn(total_timesteps=timesteps, callback=callback)
+        model.learn(total_timesteps=timesteps, callback=callback, tb_log_name=self.technique.algorithm)
         doom.close()
 
     def myTest(self, model_name: str, episodes: int) -> None:

@@ -76,7 +76,7 @@ class Doom_Levels:
 
         if self.mode == 'train':
             # model.myTrain(timesteps=250000)  # PPO_RS, PPO_RS-ent_coef
-            model.myTrain(timesteps=500000)  # PPO_RS-ent_coef-timesteps
+            model.myTrain(timesteps=500000)  # PPO_RS-ent_coef-timesteps, PPO_RS-ent_coef-killcount_coef
         elif self.mode == 'test':
             model.myTest(model_name=self.model, episodes=self.episodes)
 

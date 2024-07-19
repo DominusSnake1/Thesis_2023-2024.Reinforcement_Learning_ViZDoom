@@ -6,11 +6,6 @@ import cv2
 from icecream import ic
 
 
-def grayscale(observation):
-    gray = cv2.cvtColor(np.moveaxis(observation, 0, -1), cv2.COLOR_BGR2GRAY)
-    return gray.reshape((1, *gray.shape)).astype(np.uint8)
-
-
 class ViZDoom_Gym(Env):
     def __init__(self, level, render=False, reward_shaping=False, curriculum=False):
         super().__init__()

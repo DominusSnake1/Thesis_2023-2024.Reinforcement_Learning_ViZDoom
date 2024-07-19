@@ -17,7 +17,7 @@ def deadly_corridor(self: ViZDoom_Gym, game_variables: list):
     ammo_delta = self.ammo - ammo
     self.ammo = ammo
 
-    killcount_coef = 200
-    ammo_coef = -2
+    killcount_coef = 1250
+    ammo_coef = -1
 
     return (killcount_delta * killcount_coef) + (ammo_delta * ammo_coef)
