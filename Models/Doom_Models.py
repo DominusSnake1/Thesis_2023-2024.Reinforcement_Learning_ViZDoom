@@ -24,7 +24,7 @@ class Doom_Models:
         model = None
         doom = None
         callback = TrainAndLog_Callback(model_name=self.technique.algorithm,
-                                        check_freq=50000,
+                                        check_freq=25000,
                                         level=self.level,
                                         reward_shaping=self.technique.reward_shaping,
                                         curriculum=self.technique.curriculum_learning)
@@ -32,7 +32,7 @@ class Doom_Models:
         if self.technique.__class__.__name__ == 'PPO_Standard':
             from stable_baselines3 import PPO
 
-            doom = ViZDoom_Gym(self.level)
+            doom = ViZDoom_Gym(self.level, self.render)
 
             model = PPO(env=doom,
                         policy=self.technique.policy,
@@ -46,7 +46,7 @@ class Doom_Models:
         elif self.technique.__class__.__name__ == 'PPO_RewardShaping':
             from stable_baselines3 import PPO
 
-            doom = ViZDoom_Gym(self.level, reward_shaping=True)
+            doom = ViZDoom_Gym(self.level, self.render, reward_shaping=True)
 
             model = PPO(env=doom,
                         policy=self.technique.policy,
@@ -57,22 +57,23 @@ class Doom_Models:
                         tensorboard_log=self.log_dir,
                         verbose=1)
 
-        elif self.technique.__class__.__name__ == 'PPO_ResNet':
-            from stable_baselines3 import PPO
+        # elif self.technique.__class__.__name__ == 'PPO_ResNet':
+        #     from stable_baselines3 import PPO
+        #
+        #     doom = ViZDoom_Gym(self.level)
+        #
+        #     model = PPO(env=doom,
+        #                 policy=self.technique.policy,
+        #                 learning_rate=self.technique.learning_rate,
+        #                 policy_kwargs=self.technique.get_policy_kwargs(),
+        #                 n_steps=self.technique.n_steps,
+        #                 ent_coef=self.technique.ent_coef,
+        #                 device=self.device,
+        #                 tensorboard_log=self.log_dir,
+        #                 verbose=1)
 
-            doom = ViZDoom_Gym(self.level)
-
-            model = PPO(env=doom,
-                        policy=self.technique.policy,
-                        learning_rate=self.technique.learning_rate,
-                        policy_kwargs=self.technique.get_policy_kwargs(),
-                        n_steps=self.technique.n_steps,
-                        ent_coef=self.technique.ent_coef,
-                        device=self.device,
-                        tensorboard_log=self.log_dir,
-                        verbose=1)
-
-        model.learn(total_timesteps=timesteps, callback=callback, tb_log_name=self.technique.algorithm)
+        log_name = f'{callback.get_formatted_datetime()}_{self.technique.algorithm}'
+        model.learn(total_timesteps=timesteps, callback=callback, tb_log_name=log_name)
         doom.close()
 
     def myTest(self, model_name: str, episodes: int) -> None:

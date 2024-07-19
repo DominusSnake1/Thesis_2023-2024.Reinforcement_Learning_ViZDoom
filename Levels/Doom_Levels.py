@@ -69,10 +69,10 @@ class Doom_Levels:
         elif self.technique == 'PPO_RewardShaping':
             # selected_technique = Techniques.PPO_RewardShaping()  # PPO_RS
             selected_technique = Techniques.PPO_RewardShaping(ent_coef=0.01)  # PPO_RS-ent_coef, PPO_RS-ent_coef-timesteps
-        elif self.technique == 'PPO_ResNet':
-            selected_technique = Techniques.PPO_ResNet()
+        # elif self.technique == 'PPO_ResNet':
+        #     selected_technique = Techniques.PPO_ResNet()
 
-        model = Doom_Models(level=self.level, technique=selected_technique)
+        model = Doom_Models(level=self.level, technique=selected_technique, render=True)
 
         if self.mode == 'train':
             # model.myTrain(timesteps=250000)  # PPO_RS, PPO_RS-ent_coef
