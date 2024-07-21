@@ -2,7 +2,6 @@ from gymnasium.spaces import Discrete, Box
 from gymnasium import Env
 import vizdoom as vzd
 import numpy as np
-import cv2
 from icecream import ic
 
 
@@ -46,28 +45,30 @@ class ViZDoom_Gym(Env):
     def step(self, action):
         reward = self.game.make_action(self.actions[action], 4)
 
-        if self.game.get_state():
-            state = self.game.get_state().screen_buffer
+        state = self.game.get_state()
+
+        if state is not None:
+            screen_buffer = state.screen_buffer
             # state = grayscale(state)
 
-            info = self.game.get_state().game_variables
+            game_variables = state.game_variables
 
             if self.reward_shaping:
-                reward += self.__reward_shaping(info)
+                reward += self.__reward_shaping(game_variables)
         else:
-            state = np.zeros(self.observation_space.shape, dtype=np.uint8)
-            info = 0
+            screen_buffer = np.zeros(self.observation_space.shape, dtype=np.uint8)
+            game_variables = 0
 
         done = self.game.is_episode_finished()
-        info = {"info": info}
+        info = {"info": game_variables}
         truncated = False
 
-        return state, reward, done, truncated, info
+        return screen_buffer, reward, done, truncated, info
 
     def reset(self, seed=None, options=None):
         self.game.new_episode()
-        state = self.game.get_state().screen_buffer
-        return state, 0
+        screen_buffer = self.game.get_state().screen_buffer
+        return screen_buffer, 0
         # return grayscale(state), 0
 
     def close(self):

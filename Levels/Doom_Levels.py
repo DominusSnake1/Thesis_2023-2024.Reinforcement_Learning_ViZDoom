@@ -55,7 +55,7 @@ class Doom_Levels:
         elif self.mode == 'test':
             model.myTest(model_name=self.model, episodes=self.episodes)
 
-    def deadly_corridor(self):
+    def deadly_corridor(self, number_of_actions: int = 7):
         print("\nDescription:\n"
               "The map is a corridor with shooting monsters on both sides (6 monsters in total). A green vest is "
               "placed at the opposite end of the corridor. The reward is proportional (negative or positive) to the "
@@ -65,18 +65,18 @@ class Doom_Levels:
         selected_technique = None
 
         if self.technique == 'PPO_Standard':
-            selected_technique = Techniques.PPO_Standard()
+            selected_technique = Techniques.PPO_Standard(number_of_actions)
         elif self.technique == 'PPO_RewardShaping':
-            # selected_technique = Techniques.PPO_RewardShaping()  # PPO_RS
-            selected_technique = Techniques.PPO_RewardShaping(ent_coef=0.01)  # PPO_RS-ent_coef, PPO_RS-ent_coef-timesteps
+            # selected_technique = Techniques.PPO_RewardShaping()
+            selected_technique = Techniques.PPO_RewardShaping(ent_coef=0.01)
         # elif self.technique == 'PPO_ResNet':
         #     selected_technique = Techniques.PPO_ResNet()
 
         model = Doom_Models(level=self.level, technique=selected_technique, render=True)
 
         if self.mode == 'train':
-            # model.myTrain(timesteps=250000)  # PPO_RS, PPO_RS-ent_coef
-            model.myTrain(timesteps=500000)  # PPO_RS-ent_coef-timesteps, PPO_RS-ent_coef-killcount_coef
+            # model.myTrain(timesteps=250000)
+            model.myTrain(timesteps=500000)
         elif self.mode == 'test':
             model.myTest(model_name=self.model, episodes=self.episodes)
 

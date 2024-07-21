@@ -8,16 +8,21 @@ def deadly_corridor(self: ViZDoom_Gym, game_variables: list):
     health, killcount, ammo = game_variables
     print(f"HEALTH:{health}, KILLS:{killcount}, AMMO:{ammo}")
 
-    killcount_delta = killcount - self.killcount
-    self.killcount = killcount
+    killcount_delta = 0
+    ammo_delta = 0
+
+    if killcount > self.killcount:
+        killcount_delta = killcount - self.killcount
+        self.killcount = killcount
 
     if ammo == 8:
+        self.ammo = 8
+
+    if self.ammo > ammo:
+        ammo_delta = self.ammo - ammo
         self.ammo = ammo
 
-    ammo_delta = self.ammo - ammo
-    self.ammo = ammo
-
-    killcount_coef = 1250
-    ammo_coef = -1
+    killcount_coef = 2000
+    ammo_coef = -2
 
     return (killcount_delta * killcount_coef) + (ammo_delta * ammo_coef)
