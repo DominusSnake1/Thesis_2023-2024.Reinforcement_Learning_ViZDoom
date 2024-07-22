@@ -65,18 +65,18 @@ class Doom_Levels:
         selected_technique = None
 
         if self.technique == 'PPO_Standard':
-            selected_technique = Techniques.PPO_Standard(number_of_actions)
+            selected_technique = Techniques.PPO_Standard(number_of_actions,
+                                                         batch_size=256,
+                                                         learning_rate=0.0002,
+                                                         ent_coef=0.01)
         elif self.technique == 'PPO_RewardShaping':
-            # selected_technique = Techniques.PPO_RewardShaping()
-            selected_technique = Techniques.PPO_RewardShaping(number_of_actions, ent_coef=0.01)
-        # elif self.technique == 'PPO_ResNet':
-        #     selected_technique = Techniques.PPO_ResNet()
+            selected_technique = Techniques.PPO_RewardShaping(number_of_actions,
+                                                              ent_coef=0.01)
 
         model = Doom_Models(level=self.level, technique=selected_technique)
 
         if self.mode == 'train':
-            # model.myTrain(timesteps=250000)
-            model.myTrain(timesteps=500000)
+            model.myTrain(timesteps=200000)
         elif self.mode == 'test':
             model.myTest(model_name=self.model, episodes=self.episodes)
 
@@ -104,8 +104,8 @@ class Doom_Levels:
     def defend_the_line(self):
         print("\nDescription:\n"
               "The purpose of this scenario is to teach an agent that killing the monsters is GOOD and when monsters"
-              "kill you is BAD. In addition, wasting ammunition is not very good either."
-              "The agent is rewarded only for killing monsters, so it has to figure out the rest for itself."
+              "kill you is BAD. In addition, wasting ammunition is not very good either. The agent is rewarded only"
+              "for killing monsters, so it has to figure out the rest for itself."
 
               "The map is a rectangle. A player is spawned along the longer wall in the center. 3 melee-only and 3 "
               "shooting monsters are spawned along the opposite wall. Monsters are killed after a single shot, "

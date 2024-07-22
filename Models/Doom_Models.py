@@ -28,8 +28,10 @@ class Doom_Models:
                                         reward_shaping=self.technique.reward_shaping,
                                         curriculum=self.technique.curriculum_learning)
 
+        reset_timesteps = True  # For future implementation in curriculum.
+
         if self.technique.__class__.__name__ == 'PPO_Standard':
-            import Training.CNNFeatureExtractor as cnn
+            from Training.CNNFeatureExtractor import CNNFeatureExtractor
             from stable_baselines3 import PPO
 
             doom = ViZDoom_Gym(self.level, self.render)
@@ -39,8 +41,9 @@ class Doom_Models:
                         learning_rate=self.technique.learning_rate,
                         n_steps=self.technique.n_steps,
                         ent_coef=self.technique.ent_coef,
+                        batch_size=self.technique.batch_size,
                         policy_kwargs={
-                            'features_extractor_class': cnn.CNNFeatureExtractor,
+                            'features_extractor_class': CNNFeatureExtractor,
                             'features_extractor_kwargs': {
                                 'number_of_actions': self.technique.number_of_actions
                             }
@@ -50,7 +53,7 @@ class Doom_Models:
                         verbose=1)
 
         elif self.technique.__class__.__name__ == 'PPO_RewardShaping':
-            import Training.CNNFeatureExtractor as cnn
+            from Training.CNNFeatureExtractor import CNNFeatureExtractor
             from stable_baselines3 import PPO
 
             doom = ViZDoom_Gym(self.level, self.render, reward_shaping=True)
@@ -61,7 +64,7 @@ class Doom_Models:
                         n_steps=self.technique.n_steps,
                         ent_coef=self.technique.ent_coef,
                         policy_kwargs={
-                            'features_extractor_class': cnn.CNNFeatureExtractor,
+                            'features_extractor_class': CNNFeatureExtractor,
                             'features_extractor_kwargs': {
                                 'observation_space': doom.observation_space,
                                 'number_of_actions': self.technique.number_of_actions
@@ -71,23 +74,12 @@ class Doom_Models:
                         tensorboard_log=self.log_dir,
                         verbose=1)
 
-        # elif self.technique.__class__.__name__ == 'PPO_ResNet':
-        #     from stable_baselines3 import PPO
-        #
-        #     doom = ViZDoom_Gym(self.level)
-        #
-        #     model = PPO(env=doom,
-        #                 policy=self.technique.policy,
-        #                 learning_rate=self.technique.learning_rate,
-        #                 policy_kwargs=self.technique.get_policy_kwargs(),
-        #                 n_steps=self.technique.n_steps,
-        #                 ent_coef=self.technique.ent_coef,
-        #                 device=self.device,
-        #                 tensorboard_log=self.log_dir,
-        #                 verbose=1)
-
         log_name = f'{callback.get_formatted_datetime()}_{self.technique.algorithm}'
-        model.learn(total_timesteps=timesteps, callback=callback, tb_log_name=log_name)
+        model.learn(total_timesteps=timesteps,
+                    callback=callback,
+                    tb_log_name=log_name,
+                    progress_bar=True,
+                    reset_num_timesteps=reset_timesteps)
         doom.close()
 
     def myTest(self, model_name: str, episodes: int) -> None:
@@ -106,7 +98,6 @@ class Doom_Models:
             while not done:
                 if isinstance(obs, tuple):
                     obs = obs[0]
-                # obs = np.concatenate([obs] * 3, axis=0)
                 action, _ = model.predict(obs)
                 obs, reward, done, _, info = doom.step(action)
                 time.sleep(0.05)

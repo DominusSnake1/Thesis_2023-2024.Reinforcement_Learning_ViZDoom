@@ -37,13 +37,13 @@ class ViZDoom_Gym(Env):
     def print_available_game_variables(self):
         print(self.game.get_available_game_variables())
 
-    def __reward_shaping(self, game_variables: np.ndarray) -> int:
+    def __reward_shaping(self, game_variables: np.ndarray) -> float:
         from Training import RewardShaping
 
         return getattr(RewardShaping, self.level)(self, game_variables)
 
     def step(self, action):
-        reward = self.game.make_action(self.actions[action], 4)
+        reward = self.game.make_action(self.actions[action], tics=4)
 
         state = self.game.get_state()
 
