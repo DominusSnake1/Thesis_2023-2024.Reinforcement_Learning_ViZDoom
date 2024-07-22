@@ -1,4 +1,3 @@
-import Training.CNNFeatureExtractor as cnn
 
 
 class PPO_Standard:
@@ -12,7 +11,7 @@ class PPO_Standard:
                  n_steps=4096,
                  ent_coef=0.001):
         self.algorithm = 'PPO-S'
-        self.policy = cnn.CustomCnnPolicy
+        self.policy = "CnnPolicy"
         self.number_of_actions = number_of_actions
         self.reward_shaping = False
         self.curriculum_learning = False
@@ -27,11 +26,13 @@ class PPO_RewardShaping:
     """
 
     def __init__(self,
+                 number_of_actions: int,
                  learning_rate=0.0001,
                  n_steps=4096,
                  ent_coef=0.001):
         self.algorithm = 'PPO-RS'
-        self.policy = cnn.CustomCnnPolicy
+        self.policy = "CnnPolicy"
+        self.number_of_actions = number_of_actions
         self.reward_shaping = True
         self.curriculum_learning = False
         self.learning_rate = learning_rate

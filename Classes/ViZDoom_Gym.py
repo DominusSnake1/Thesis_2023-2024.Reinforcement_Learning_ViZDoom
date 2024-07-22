@@ -48,7 +48,7 @@ class ViZDoom_Gym(Env):
         state = self.game.get_state()
 
         if state is not None:
-            screen_buffer = state.screen_buffer
+            self.observation_space = state.screen_buffer
             # state = grayscale(state)
 
             game_variables = state.game_variables
@@ -56,14 +56,14 @@ class ViZDoom_Gym(Env):
             if self.reward_shaping:
                 reward += self.__reward_shaping(game_variables)
         else:
-            screen_buffer = np.zeros(self.observation_space.shape, dtype=np.uint8)
+            self.observation_space = np.zeros(self.observation_space.shape, dtype=np.uint8)
             game_variables = 0
 
         done = self.game.is_episode_finished()
         info = {"info": game_variables}
         truncated = False
 
-        return screen_buffer, reward, done, truncated, info
+        return self.observation_space, reward, done, truncated, info
 
     def reset(self, seed=None, options=None):
         self.game.new_episode()

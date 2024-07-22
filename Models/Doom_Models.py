@@ -1,7 +1,6 @@
 from Classes.TrainAndLog_Callback import TrainAndLog_Callback
 from Classes.ViZDoom_Gym import ViZDoom_Gym
 from Other.Utils import timer
-import numpy as np
 import torch
 import time
 from icecream import ic
@@ -30,6 +29,7 @@ class Doom_Models:
                                         curriculum=self.technique.curriculum_learning)
 
         if self.technique.__class__.__name__ == 'PPO_Standard':
+            import Training.CNNFeatureExtractor as cnn
             from stable_baselines3 import PPO
 
             doom = ViZDoom_Gym(self.level, self.render)
@@ -39,11 +39,18 @@ class Doom_Models:
                         learning_rate=self.technique.learning_rate,
                         n_steps=self.technique.n_steps,
                         ent_coef=self.technique.ent_coef,
+                        policy_kwargs={
+                            'features_extractor_class': cnn.CNNFeatureExtractor,
+                            'features_extractor_kwargs': {
+                                'number_of_actions': self.technique.number_of_actions
+                            }
+                        },
                         device=self.device,
                         tensorboard_log=self.log_dir,
                         verbose=1)
 
         elif self.technique.__class__.__name__ == 'PPO_RewardShaping':
+            import Training.CNNFeatureExtractor as cnn
             from stable_baselines3 import PPO
 
             doom = ViZDoom_Gym(self.level, self.render, reward_shaping=True)
@@ -53,6 +60,13 @@ class Doom_Models:
                         learning_rate=self.technique.learning_rate,
                         n_steps=self.technique.n_steps,
                         ent_coef=self.technique.ent_coef,
+                        policy_kwargs={
+                            'features_extractor_class': cnn.CNNFeatureExtractor,
+                            'features_extractor_kwargs': {
+                                'observation_space': doom.observation_space,
+                                'number_of_actions': self.technique.number_of_actions
+                            }
+                        },
                         device=self.device,
                         tensorboard_log=self.log_dir,
                         verbose=1)
