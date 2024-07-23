@@ -28,11 +28,30 @@ class Doom_Models:
                                         reward_shaping=self.technique.reward_shaping,
                                         curriculum=self.technique.curriculum_learning)
 
+        log_name = f'{callback.get_formatted_datetime()}_{self.technique.algorithm}'
+
         if self.technique.__class__.__name__ == 'PPO_Standard':
+            doom = ViZDoom_Gym(level=self.level,
+                               render=self.render)
+
+        elif self.technique.__class__.__name__ == 'PPO_RewardShaping':
+            doom = ViZDoom_Gym(self.level,
+                               self.render,
+                               reward_shaping=self.technique.reward_shaping)
+
+        elif self.technique.__class__.__name__ == 'PPO_CurriculumLearning':
+            from Training import CurriculumLearning
+            getattr(CurriculumLearning, self.level)(self, callback, int(timesteps/5))
+
+            doom = ViZDoom_Gym(level=self.level,
+                               render=self.render,
+                               reward_shaping=self.technique.reward_shaping,
+                               curriculum=self.technique.curriculum)
+
+        algorithm = self.technique.algorithm[:3]
+        if algorithm == 'PPO':
             from Training.CNNFeatureExtractor import CNNFeatureExtractor
             from stable_baselines3 import PPO
-
-            doom = ViZDoom_Gym(self.level, self.render)
 
             model = PPO(env=doom,
                         policy=self.technique.policy,
@@ -53,64 +72,12 @@ class Doom_Models:
                         tensorboard_log=self.log_dir,
                         verbose=1)
 
-        elif self.technique.__class__.__name__ == 'PPO_RewardShaping':
-            from Training.CNNFeatureExtractor import CNNFeatureExtractor
-            from stable_baselines3 import PPO
-
-            doom = ViZDoom_Gym(self.level,
-                               self.render,
-                               reward_shaping=self.technique.reward_shaping)
-
-            model = PPO(env=doom,
-                        policy=self.technique.policy,
-                        learning_rate=self.technique.learning_rate,
-                        n_steps=self.technique.n_steps,
-                        ent_coef=self.technique.ent_coef,
-                        policy_kwargs={
-                            'features_extractor_class': CNNFeatureExtractor,
-                            'features_extractor_kwargs': {
-                                'observation_space': doom.observation_space,
-                                'number_of_actions': self.technique.number_of_actions
-                            }
-                        },
-                        device=self.device,
-                        tensorboard_log=self.log_dir,
-                        verbose=1)
-
-        elif self.technique.__class__.__name__ == 'PPO_CurriculumLearning':
-            from Training import CurriculumLearning
-            getattr(CurriculumLearning, self.level)(self, callback, timesteps)
-
-            from Training.CNNFeatureExtractor import CNNFeatureExtractor
-            from stable_baselines3 import PPO
-
-            doom = ViZDoom_Gym(level=self.level,
-                               render=self.render,
-                               reward_shaping=self.technique.reward_shaping,
-                               curriculum=self.technique.curriculum)
-
-            model = PPO(env=doom,
-                        policy=self.technique.policy,
-                        learning_rate=self.technique.learning_rate,
-                        n_steps=self.technique.n_steps,
-                        ent_coef=self.technique.ent_coef,
-                        policy_kwargs={
-                            'features_extractor_class': CNNFeatureExtractor,
-                            'features_extractor_kwargs': {
-                                'observation_space': doom.observation_space,
-                                'number_of_actions': self.technique.number_of_actions
-                            }
-                        },
-                        device=self.device,
-                        tensorboard_log=self.log_dir,
-                        verbose=1)
-
-        log_name = f'{callback.get_formatted_datetime()}_{self.technique.algorithm}'
         model.learn(total_timesteps=timesteps,
                     callback=callback,
                     tb_log_name=log_name,
                     progress_bar=True,
                     reset_num_timesteps=True)
+
         doom.close()
 
     def myTest(self, model_name: str, episodes: int) -> None:

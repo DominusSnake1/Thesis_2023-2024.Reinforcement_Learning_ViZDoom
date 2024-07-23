@@ -9,6 +9,8 @@ def deadly_corridor(self: Doom_Models, callback: TrainAndLog_Callback, timesteps
     for skill in range(1, 5):
         current_level = f"{self.level}_s{skill}"
 
+        log_name = f'{callback.get_formatted_datetime()}_{self.technique.algorithm}'
+
         doom = ViZDoom_Gym(level=current_level,
                            render=self.render,
                            reward_shaping=self.technique.reward_shaping,
@@ -30,7 +32,6 @@ def deadly_corridor(self: Doom_Models, callback: TrainAndLog_Callback, timesteps
                     tensorboard_log=self.log_dir,
                     verbose=1)
 
-        log_name = f'{callback.get_formatted_datetime()}_{self.technique.algorithm}'
         model.learn(total_timesteps=timesteps,
                     callback=callback,
                     tb_log_name=log_name,
