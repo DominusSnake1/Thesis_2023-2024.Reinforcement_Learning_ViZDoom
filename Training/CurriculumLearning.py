@@ -1,36 +1,38 @@
-from Classes.TrainAndLog_Callback import get_formatted_datetime
 from Classes.ViZDoom_Gym import ViZDoom_Gym
-from Models.Doom_Models import Doom_Models
-import glob
-import os
+from Classes import TrainAndLog_Callback
+from Training import CNNFeatureExtractor
+from stable_baselines3 import PPO
+from Models import Doom_Models
 
 
-def CurriculumLearning(self: Doom_Models, level_name, model, callback):
-    """
-    Uses pre created levels (with increasing difficulty) to train a model.
-    After a certain amount of training steps (50000), the level's difficulty increases accordingly.
-    Then the same model is trained again.
+def deadly_corridor(self: Doom_Models, callback: TrainAndLog_Callback, timesteps: int):
+    for skill in range(1, 5):
+        current_level = f"{self.level}_s{skill}"
 
-    :param self: Object containing information about the model
-    :param level_name: Name of the level
-    :param model: Model to be trained
-    :param callback: Callback function
-    """
-    sub_levels = [level_name + "_s1", level_name + "_s2", level_name + "_s3", level_name + "_s4"]
-    base_model_location = f'Data/Train/train_{level_name}/{get_formatted_datetime()}'
+        doom = ViZDoom_Gym(level=current_level,
+                           render=self.render,
+                           reward_shaping=self.technique.reward_shaping,
+                           curriculum=self.technique.curriculum)
 
-    for sub_level in sub_levels:
-        print(f"\nTraining on sub-level: {sub_level}...")
-        env = ViZDoom_Gym(level=sub_level, reward_shaping=self.adjustments, render=self.render, curriculum=True)
-        model.set_env(env)
-        model.learn(total_timesteps=50000, callback=callback)
+        model = PPO(env=doom,
+                    policy=self.technique.policy,
+                    learning_rate=self.technique.learning_rate,
+                    n_steps=self.technique.n_steps,
+                    ent_coef=self.technique.ent_coef,
+                    policy_kwargs={
+                        'features_extractor_class': CNNFeatureExtractor,
+                        'features_extractor_kwargs': {
+                            'observation_space': doom.observation_space,
+                            'number_of_actions': self.technique.number_of_actions
+                        }
+                    },
+                    device=self.device,
+                    tensorboard_log=self.log_dir,
+                    verbose=1)
 
-        model_location = glob.glob(f'{base_model_location}/*')
-
-        if model_location:
-            # Gets the latest model from the folder and continues training with it.
-            latest_model = max(model_location, key=os.path.getctime)
-            model.load(latest_model)
-        else:
-            print(f"No models found in {base_model_location} to load after training {sub_level}.")
-            break
+        log_name = f'{callback.get_formatted_datetime()}_{self.technique.algorithm}'
+        model.learn(total_timesteps=timesteps,
+                    callback=callback,
+                    tb_log_name=log_name,
+                    progress_bar=True,
+                    reset_num_timesteps=False)

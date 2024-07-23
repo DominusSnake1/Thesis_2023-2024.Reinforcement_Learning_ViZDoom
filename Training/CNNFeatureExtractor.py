@@ -1,8 +1,10 @@
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 from gymnasium.spaces import Box
 import torch.nn.functional as F
+from icecream import ic
 import torch.nn as nn
 import torch
+
 
 class CNNFeatureExtractor(BaseFeaturesExtractor):
     def __init__(self, observation_space: Box, number_of_actions: int):
@@ -41,7 +43,7 @@ class CNNFeatureExtractor(BaseFeaturesExtractor):
         self.dropout = nn.Dropout(p=0.5)
 
         # Define a fully connected layer to output the number of actions.
-        self.output = nn.Linear(3200, number_of_actions)  # Adjust the input size of this layer
+        self.output = nn.Linear(34048, number_of_actions)  # Adjust the input size of this layer
 
     def forward(self, observations: torch.Tensor) -> torch.Tensor:
         """

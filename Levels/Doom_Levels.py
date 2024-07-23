@@ -67,16 +67,22 @@ class Doom_Levels:
         if self.technique == 'PPO_Standard':
             selected_technique = Techniques.PPO_Standard(number_of_actions,
                                                          batch_size=128,
-                                                         learning_rate=0.0003,
-                                                         ent_coef=0.01)
+                                                         n_steps=8192,
+                                                         learning_rate=0.00001,
+                                                         ent_coef=0.01,
+                                                         clip_range=0.1,
+                                                         gamma=0.95,
+                                                         gae_lambda=0.9)
         elif self.technique == 'PPO_RewardShaping':
             selected_technique = Techniques.PPO_RewardShaping(number_of_actions,
                                                               ent_coef=0.01)
+        elif self.technique == 'PPO_CurriculumLearning':
+            selected_technique = Techniques.PPO_CurriculumLearning(number_of_actions)
 
         model = Doom_Models(level=self.level, technique=selected_technique)
 
         if self.mode == 'train':
-            model.myTrain(timesteps=200000)
+            model.myTrain(timesteps=150000)
         elif self.mode == 'test':
             model.myTest(model_name=self.model, episodes=self.episodes)
 
