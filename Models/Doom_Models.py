@@ -36,6 +36,16 @@ class Doom_Models:
 
             doom = ViZDoom_Gym(self.level, self.render)
 
+            # model = PPO(env=doom,
+            #             policy=self.technique.policy,
+            #             learning_rate=self.technique.learning_rate,
+            #             n_steps=self.technique.n_steps,
+            #             ent_coef=self.technique.ent_coef,
+            #             batch_size=self.technique.batch_size,
+            #             device=self.device,
+            #             tensorboard_log=self.log_dir,
+            #             verbose=1)
+
             model = PPO(env=doom,
                         policy=self.technique.policy,
                         learning_rate=self.technique.learning_rate,

@@ -34,7 +34,7 @@ class Doom_Levels:
         elif self.mode == 'test':
             model.myTest(model_name=self.model, episodes=self.episodes)
 
-    def defend_the_center(self):
+    def defend_the_center(self, number_of_actions: int = 3):
         print("\nDescription:\n"
               "The map is a large circle. A player is spawned in the exact center. 5 melee-only, monsters are spawned "
               "along the wall. Monsters are killed after a single shot. After dying, each monster is respawned after "
@@ -43,7 +43,7 @@ class Doom_Levels:
         selected_technique = None
 
         if self.technique == 'PPO_Standard':
-            selected_technique = Techniques.PPO_Standard()
+            selected_technique = Techniques.PPO_Standard(number_of_actions)
         elif self.technique == 'PPO_RewardShaping':
             selected_technique = Techniques.PPO_RewardShaping()
 
@@ -66,8 +66,8 @@ class Doom_Levels:
 
         if self.technique == 'PPO_Standard':
             selected_technique = Techniques.PPO_Standard(number_of_actions,
-                                                         batch_size=256,
-                                                         learning_rate=0.0002,
+                                                         batch_size=128,
+                                                         learning_rate=0.0003,
                                                          ent_coef=0.01)
         elif self.technique == 'PPO_RewardShaping':
             selected_technique = Techniques.PPO_RewardShaping(number_of_actions,

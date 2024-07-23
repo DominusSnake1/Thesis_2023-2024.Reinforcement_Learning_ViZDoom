@@ -13,14 +13,12 @@ class PPO_Standard:
         :param n_steps: The number of steps to run for each environment per update.
         :param ent_coef: Entropy coefficient for the loss calculation.
         :param batch_size: The size of the mini-batch.
-        :param use_sde: Whether to use generalized State Dependent Exploration (gSDE) instead of action noise exploration.
         """
         self.number_of_actions = number_of_actions
         self.learning_rate = learning_rate
         self.n_steps = n_steps
         self.ent_coef = ent_coef
         self.batch_size = batch_size
-        self.use_sde = use_sde
 
         # Algorithm name for identification.
         self.algorithm = "PPO-S"
