@@ -21,7 +21,6 @@ class Doom_Models:
         print('(If you wish to stop training sooner, just press CTRL+C)\n')
 
         model = None
-        doom = None
         callback = TrainAndLog_Callback(model_name=self.technique.algorithm,
                                         check_freq=25000,
                                         level=self.level,
@@ -30,25 +29,13 @@ class Doom_Models:
 
         log_name = f'{callback.get_formatted_datetime()}_{self.technique.algorithm}'
 
-        if self.technique.__class__.__name__ == 'PPO_Standard':
-            doom = ViZDoom_Gym(level=self.level,
-                               render=self.render)
-
-        elif self.technique.__class__.__name__ == 'PPO_RewardShaping':
-            doom = ViZDoom_Gym(self.level,
-                               self.render,
-                               reward_shaping=self.technique.reward_shaping)
-
-        elif self.technique.__class__.__name__ == 'PPO_CurriculumLearning':
-            from Training import CurriculumLearning
-            getattr(CurriculumLearning, self.level)(self, callback, int(timesteps/5))
-
-            doom = ViZDoom_Gym(level=self.level,
-                               render=self.render,
-                               reward_shaping=self.technique.reward_shaping,
-                               curriculum=self.technique.curriculum)
+        doom = ViZDoom_Gym(level=self.level,
+                           render=self.render,
+                           reward_shaping=self.technique.reward_shaping,
+                           curriculum=self.technique.curriculum_learning)
 
         algorithm = self.technique.algorithm[:3]
+
         if algorithm == 'PPO':
             from Training.CNNFeatureExtractor import CNNFeatureExtractor
             from stable_baselines3 import PPO
@@ -71,6 +58,18 @@ class Doom_Models:
                         device=self.device,
                         tensorboard_log=self.log_dir,
                         verbose=1)
+
+        if self.technique.curriculum_learning:
+            from Training import CurriculumLearning
+
+            last_model = CurriculumLearning.CurriculumLearning(timesteps=int(timesteps / 4),
+                                                               render=self.render,
+                                                               level=self.level,
+                                                               log_name=log_name,
+                                                               callback=callback,
+                                                               model=model)
+
+            model.load(last_model)
 
         model.learn(total_timesteps=timesteps,
                     callback=callback,

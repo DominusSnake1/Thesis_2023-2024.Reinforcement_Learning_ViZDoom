@@ -1,39 +1,42 @@
 from Classes.ViZDoom_Gym import ViZDoom_Gym
 from Classes import TrainAndLog_Callback
-from Training import CNNFeatureExtractor
-from stable_baselines3 import PPO
 from Models import Doom_Models
+import glob
+import os
 
 
-def deadly_corridor(self: Doom_Models, callback: TrainAndLog_Callback, timesteps: int):
+def CurriculumLearning(timesteps: int,
+                       level: str,
+                       model: Doom_Models,
+                       callback: TrainAndLog_Callback,
+                       render: bool,
+                       log_name: str):
+
+    latest_model = None
+    last_model_location = f'Data/Train/train_{level}/{callback.get_formatted_datetime()}'
+
     for skill in range(1, 5):
-        current_level = f"{self.level}_s{skill}"
-
-        log_name = f'{callback.get_formatted_datetime()}_{self.technique.algorithm}'
-
-        doom = ViZDoom_Gym(level=current_level,
-                           render=self.render,
-                           reward_shaping=self.technique.reward_shaping,
-                           curriculum=self.technique.curriculum)
-
-        model = PPO(env=doom,
-                    policy=self.technique.policy,
-                    learning_rate=self.technique.learning_rate,
-                    n_steps=self.technique.n_steps,
-                    ent_coef=self.technique.ent_coef,
-                    policy_kwargs={
-                        'features_extractor_class': CNNFeatureExtractor,
-                        'features_extractor_kwargs': {
-                            'observation_space': doom.observation_space,
-                            'number_of_actions': self.technique.number_of_actions
-                        }
-                    },
-                    device=self.device,
-                    tensorboard_log=self.log_dir,
-                    verbose=1)
-
+        sub_level = f'{level}_s{skill}'
+        print(f"\nTraining on sub-level: {sub_level}...")
+        doom = ViZDoom_Gym(level=sub_level,
+                           render=render,
+                           reward_shaping=False,
+                           curriculum=True)
+        model.set_env(doom)
         model.learn(total_timesteps=timesteps,
                     callback=callback,
                     tb_log_name=log_name,
                     progress_bar=True,
                     reset_num_timesteps=False)
+
+        model_location = glob.glob(f'{last_model_location}/*')
+
+        if model_location:
+            # Gets the latest model from the folder and continues training with it.
+            latest_model = max(model_location, key=os.path.getctime)
+            model.load(latest_model)
+        else:
+            print(f"No models found in {last_model_location} to load after training {sub_level}.")
+            break
+
+    return latest_model

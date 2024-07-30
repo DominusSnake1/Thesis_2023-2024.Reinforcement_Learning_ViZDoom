@@ -55,7 +55,7 @@ class Doom_Levels:
         elif self.mode == 'test':
             model.myTest(model_name=self.model, episodes=self.episodes)
 
-    def deadly_corridor(self, number_of_actions: int = 7):
+    def deadly_corridor(self, actions: int = 7):
         print("\nDescription:\n"
               "The map is a corridor with shooting monsters on both sides (6 monsters in total). A green vest is "
               "placed at the opposite end of the corridor. The reward is proportional (negative or positive) to the "
@@ -65,19 +65,22 @@ class Doom_Levels:
         selected_technique = None
 
         if self.technique == 'PPO_Standard':
-            selected_technique = Techniques.PPO_Standard(number_of_actions,
-                                                         batch_size=128,
+            selected_technique = Techniques.PPO_Standard(number_of_actions=actions,
+                                                         batch_size=256,
                                                          n_steps=8192,
-                                                         learning_rate=0.00001,
+                                                         learning_rate=0.0003,
                                                          ent_coef=0.01,
                                                          clip_range=0.1,
                                                          gamma=0.95,
                                                          gae_lambda=0.9)
         elif self.technique == 'PPO_RewardShaping':
-            selected_technique = Techniques.PPO_RewardShaping(number_of_actions,
+            selected_technique = Techniques.PPO_RewardShaping(number_of_actions=actions,
                                                               ent_coef=0.01)
         elif self.technique == 'PPO_CurriculumLearning':
-            selected_technique = Techniques.PPO_CurriculumLearning(number_of_actions)
+            selected_technique = Techniques.PPO_CurriculumLearning(number_of_actions=actions)
+
+        elif self.technique == 'DQN_Standard':
+            selected_technique = Techniques.DQN_Standard(number_of_actions=actions)
 
         model = Doom_Models(level=self.level, technique=selected_technique)
 
