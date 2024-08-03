@@ -17,20 +17,23 @@ def deadly_corridor(self: ViZDoom_Gym, game_variables: list) -> float:
     killcount_delta = 0
     ammo_delta = 0
 
-    # Calculate the delta only when the changes are positive.
+    # Calculate the delta only when the agent gets a kill.
     if killcount > self.killcount:
         killcount_delta = killcount - self.killcount
-        self.killcount = killcount
 
     if ammo == 8:
         self.ammo = 8
 
-    # Calculate the delta only when the changes are positive.
+    # Calculate the delta only when the agent spends a bullet.
     if self.ammo > ammo:
         ammo_delta = self.ammo - ammo
-        self.ammo = ammo
 
-    killcount_coef = 2000
-    ammo_coef = -2
+    self.killcount = killcount
+    self.ammo = ammo
+
+    # Reward agent for getting kills.
+    killcount_coef = 150
+    # Punish agent for spending bullets.
+    ammo_coef = -1
 
     return (killcount_delta * killcount_coef) + (ammo_delta * ammo_coef)

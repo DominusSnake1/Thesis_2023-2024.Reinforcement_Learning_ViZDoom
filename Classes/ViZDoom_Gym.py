@@ -1,3 +1,5 @@
+import os.path
+
 from gymnasium.spaces import Discrete, Box
 from gymnasium import Env
 import vizdoom as vzd
@@ -14,11 +16,10 @@ class ViZDoom_Gym(Env):
         self.game = vzd.DoomGame()
         self.game.set_doom_game_path('Other/DOOM2.WAD')
 
-        if self.use_curriculum:
-            self.level = self.level[:-3]
+        cfg = f'ViZDoom/scenarios/{level}.cfg'
+
+        if self.use_curriculum and os.path.exists(f'Levels/LevelsCurriculum/{level}.cfg'):
             cfg = f'Levels/LevelsCurriculum/{level}.cfg'
-        else:
-            cfg = f'ViZDoom/scenarios/{level}.cfg'
 
         self.game.load_config(cfg)
 
@@ -63,6 +64,7 @@ class ViZDoom_Gym(Env):
         info = {"info": game_variables}
         truncated = False
 
+        print("reward:", reward)
         return self.observation_space, reward, done, truncated, info
 
     def reset(self, seed=None, options=None):

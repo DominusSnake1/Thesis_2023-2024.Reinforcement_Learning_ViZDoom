@@ -1,8 +1,6 @@
 from Classes.ViZDoom_Gym import ViZDoom_Gym
 from Classes import TrainAndLog_Callback
 from Models import Doom_Models
-import glob
-import os
 
 
 def CurriculumLearning(timesteps: int,
@@ -12,31 +10,29 @@ def CurriculumLearning(timesteps: int,
                        render: bool,
                        log_name: str):
 
-    latest_model = None
-    last_model_location = f'Data/Train/train_{level}/{callback.get_formatted_datetime()}'
+    first_level = f'{level}_s1'
 
-    for skill in range(1, 5):
-        sub_level = f'{level}_s{skill}'
-        print(f"\nTraining on sub-level: {sub_level}...")
-        doom = ViZDoom_Gym(level=sub_level,
-                           render=render,
-                           reward_shaping=False,
-                           curriculum=True)
-        model.set_env(doom)
+    doom = ViZDoom_Gym(level=first_level,
+                       render=render,
+                       reward_shaping=False,
+                       curriculum=True)
+    model.set_env(doom)
+
+    # For Doom Skill (difficulty) 2 to 5.
+    for skill in range(2, 6):
+        print(f"\nTraining on sub-level: {doom.level}...")
+
         model.learn(total_timesteps=timesteps,
                     callback=callback,
                     tb_log_name=log_name,
                     progress_bar=True,
                     reset_num_timesteps=False)
 
-        model_location = glob.glob(f'{last_model_location}/*')
+        next_level = f'{level}_s{skill}'
+        doom = ViZDoom_Gym(level=next_level,
+                           render=render,
+                           reward_shaping=False,
+                           curriculum=True)
+        model.set_env(doom)
 
-        if model_location:
-            # Gets the latest model from the folder and continues training with it.
-            latest_model = max(model_location, key=os.path.getctime)
-            model.load(latest_model)
-        else:
-            print(f"No models found in {last_model_location} to load after training {sub_level}.")
-            break
-
-    return latest_model
+    return model

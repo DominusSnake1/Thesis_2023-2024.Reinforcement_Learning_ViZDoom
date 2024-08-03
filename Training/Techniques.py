@@ -14,6 +14,9 @@ class BASE_PPO:
         :param n_steps: The number of steps to run for each environment per update.
         :param ent_coef: Entropy coefficient for the loss calculation.
         :param batch_size: The size of the mini-batch.
+        :param clip_range:
+        :param gamma:
+        :param gae_lambda:
         """
         self.number_of_actions = number_of_actions
         self.learning_rate = learning_rate
@@ -54,7 +57,7 @@ class PPO_RewardShaping(BASE_PPO):
         self.reward_shaping = True
 
 
-class PPO_CurriculumLearning(BASE_PPO):
+class PPO_Curriculum(BASE_PPO):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -70,7 +73,7 @@ class BASE_DQN:
                  number_of_actions: int,
                  learning_rate: float = 0.0001,
                  buffer_size: int = 1_000_000,
-                 learning_start: int = 50_000,
+                 learning_starts: int = 50_000,
                  batch_size: int = 32,
                  tau: float = 1.0,
                  gamma: float = 0.99,
@@ -83,7 +86,7 @@ class BASE_DQN:
         self.number_of_actions = number_of_actions
         self.learning_rate = learning_rate
         self.buffer_size = buffer_size
-        self.learning_start = learning_start
+        self.learning_starts = learning_starts
         self.batch_size = batch_size
         self.tau = tau
         self.gamma = gamma

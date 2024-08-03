@@ -49,12 +49,12 @@ def mode_selector() -> str:
 
 def technique_selector() -> str:
     args = sys.argv[1:]
-    techniques = ['PPO_Standard', 'PPO_RewardShaping', 'PPO_CurriculumLearning', 'DQN_Standard']
+    techniques = ['PPO_Standard', 'PPO_RewardShaping', 'PPO_Curriculum', 'DQN_Standard']
 
-    if args[4] != '-t':
+    if (len(args) < 5) or (args[4] != '-t'):
         raise Exception("In order to choose a technique you must use \'-t\' after selecting a mode.")
 
-    if (args[5] == 'YOUR_TECHNIQUE') or (args[5] not in techniques):
+    if (len(args) < 6) or ((args[5] == 'YOUR_TECHNIQUE') or (args[5] not in techniques)):
         exception_message = "Please select a technique from the list:\n"
 
         for i, technique in enumerate(techniques, 1):

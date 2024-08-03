@@ -49,12 +49,45 @@ class Doom_Models:
                         gamma=self.technique.gamma,
                         clip_range=self.technique.clip_range,
                         gae_lambda=self.technique.gae_lambda,
-                        policy_kwargs={
-                            'features_extractor_class': CNNFeatureExtractor,
-                            'features_extractor_kwargs': {
-                                'number_of_actions': self.technique.number_of_actions
-                            }
-                        },
+                        device=self.device,
+                        tensorboard_log=self.log_dir,
+                        verbose=1)
+
+            # model = PPO(env=doom,
+            #             policy=self.technique.policy,
+            #             learning_rate=self.technique.learning_rate,
+            #             n_steps=self.technique.n_steps,
+            #             ent_coef=self.technique.ent_coef,
+            #             batch_size=self.technique.batch_size,
+            #             gamma=self.technique.gamma,
+            #             clip_range=self.technique.clip_range,
+            #             gae_lambda=self.technique.gae_lambda,
+            #             policy_kwargs={
+            #                 'features_extractor_class': CNNFeatureExtractor,
+            #                 'features_extractor_kwargs': {
+            #                     'number_of_actions': self.technique.number_of_actions
+            #                 }
+            #             },
+            #             device=self.device,
+            #             tensorboard_log=self.log_dir,
+            #             verbose=1)
+
+        elif algorithm == 'DQN':
+            from stable_baselines3 import DQN
+
+            model = DQN(env=doom,
+                        policy=self.technique.policy,
+                        learning_rate=self.technique.learning_rate,
+                        buffer_size=self.technique.buffer_size,
+                        learning_starts=self.technique.learning_starts,
+                        batch_size=self.technique.batch_size,
+                        tau=self.technique.tau,
+                        gamma=self.technique.gamma,
+                        gradient_steps=self.technique.gradient_steps,
+                        exploration_fraction=self.technique.exploration_fraction,
+                        exploration_initial_eps=self.technique.exploration_initial_eps,
+                        exploration_final_eps=self.technique.exploration_final_eps,
+                        max_grad_norm=self.technique.max_grad_norm,
                         device=self.device,
                         tensorboard_log=self.log_dir,
                         verbose=1)
@@ -62,14 +95,12 @@ class Doom_Models:
         if self.technique.curriculum_learning:
             from Training import CurriculumLearning
 
-            last_model = CurriculumLearning.CurriculumLearning(timesteps=int(timesteps / 4),
-                                                               render=self.render,
-                                                               level=self.level,
-                                                               log_name=log_name,
-                                                               callback=callback,
-                                                               model=model)
-
-            model.load(last_model)
+            model = CurriculumLearning.CurriculumLearning(timesteps=int(timesteps / 4),
+                                                          render=self.render,
+                                                          level=self.level,
+                                                          log_name=log_name,
+                                                          callback=callback,
+                                                          model=model)
 
         model.learn(total_timesteps=timesteps,
                     callback=callback,
@@ -80,12 +111,17 @@ class Doom_Models:
         doom.close()
 
     def myTest(self, model_name: str, episodes: int) -> None:
-        doom = ViZDoom_Gym(self.level, render=True)
+        doom = ViZDoom_Gym(self.level, render=True, reward_shaping=self.technique.reward_shaping)
         model = None
 
-        if self.technique.__class__.__name__ in ["PPO_Standard", "PPO_RewardShaping", "PPO_ResNet"]:
+        if self.technique.__class__.__name__ in ["PPO_Standard", "PPO_RewardShaping", "PPO_ResNet",
+                                                 "PPO_Curriculum"]:
             from stable_baselines3 import PPO
             model = PPO.load(f'./Data/Train/train_{self.level}/{model_name}')
+
+        elif self.technique.__class__.__name__ == "DQN_Standard":
+            from stable_baselines3 import DQN
+            model = DQN.load(f'./Data/Train/train_{self.level}/{model_name}')
 
         avg_model_score = 0
         for episode in range(episodes):
