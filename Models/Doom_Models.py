@@ -7,13 +7,17 @@ from icecream import ic
 
 
 class Doom_Models:
-    def __init__(self, level: str, technique, render: bool = False):
+    def __init__(self, level: str, render: bool, display_rewards: bool = False):
         self.level = level
-        self.technique = technique
         self.render = render
+        self.selected_technique = None
+        self.display_rewards = display_rewards
 
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         self.log_dir = f'./Data/Logs/log_{level}'
+
+    def set_technique(self, technique):
+        self.selected_technique = technique
 
     @timer
     def myTrain(self, timesteps: int) -> None:
@@ -21,34 +25,35 @@ class Doom_Models:
         print('(If you wish to stop training sooner, just press CTRL+C)\n')
 
         model = None
-        callback = TrainAndLog_Callback(model_name=self.technique.algorithm,
+        callback = TrainAndLog_Callback(model_name=self.selected_technique.algorithm,
                                         check_freq=25000,
                                         level=self.level,
-                                        reward_shaping=self.technique.reward_shaping,
-                                        curriculum=self.technique.curriculum_learning)
+                                        reward_shaping=self.selected_technique.reward_shaping,
+                                        curriculum=self.selected_technique.curriculum_learning)
 
-        log_name = f'{callback.get_formatted_datetime()}_{self.technique.algorithm}'
+        log_name = f'{callback.get_formatted_datetime()}_{self.selected_technique.algorithm}'
 
         doom = ViZDoom_Gym(level=self.level,
                            render=self.render,
-                           reward_shaping=self.technique.reward_shaping,
-                           curriculum=self.technique.curriculum_learning)
+                           display_rewards=self.display_rewards,
+                           reward_shaping=self.selected_technique.reward_shaping,
+                           curriculum=self.selected_technique.curriculum_learning)
 
-        algorithm = self.technique.algorithm[:3]
+        algorithm = self.selected_technique.algorithm[:3]
 
         if algorithm == 'PPO':
             from Training.CNNFeatureExtractor import CNNFeatureExtractor
             from stable_baselines3 import PPO
 
             model = PPO(env=doom,
-                        policy=self.technique.policy,
-                        learning_rate=self.technique.learning_rate,
-                        n_steps=self.technique.n_steps,
-                        ent_coef=self.technique.ent_coef,
-                        batch_size=self.technique.batch_size,
-                        gamma=self.technique.gamma,
-                        clip_range=self.technique.clip_range,
-                        gae_lambda=self.technique.gae_lambda,
+                        policy=self.selected_technique.policy,
+                        learning_rate=self.selected_technique.learning_rate,
+                        n_steps=self.selected_technique.n_steps,
+                        ent_coef=self.selected_technique.ent_coef,
+                        batch_size=self.selected_technique.batch_size,
+                        gamma=self.selected_technique.gamma,
+                        clip_range=self.selected_technique.clip_range,
+                        gae_lambda=self.selected_technique.gae_lambda,
                         device=self.device,
                         tensorboard_log=self.log_dir,
                         verbose=1)
@@ -76,23 +81,23 @@ class Doom_Models:
             from stable_baselines3 import DQN
 
             model = DQN(env=doom,
-                        policy=self.technique.policy,
-                        learning_rate=self.technique.learning_rate,
-                        buffer_size=self.technique.buffer_size,
-                        learning_starts=self.technique.learning_starts,
-                        batch_size=self.technique.batch_size,
-                        tau=self.technique.tau,
-                        gamma=self.technique.gamma,
-                        gradient_steps=self.technique.gradient_steps,
-                        exploration_fraction=self.technique.exploration_fraction,
-                        exploration_initial_eps=self.technique.exploration_initial_eps,
-                        exploration_final_eps=self.technique.exploration_final_eps,
-                        max_grad_norm=self.technique.max_grad_norm,
+                        policy=self.selected_technique.policy,
+                        learning_rate=self.selected_technique.learning_rate,
+                        buffer_size=self.selected_technique.buffer_size,
+                        learning_starts=self.selected_technique.learning_starts,
+                        batch_size=self.selected_technique.batch_size,
+                        tau=self.selected_technique.tau,
+                        gamma=self.selected_technique.gamma,
+                        gradient_steps=self.selected_technique.gradient_steps,
+                        exploration_fraction=self.selected_technique.exploration_fraction,
+                        exploration_initial_eps=self.selected_technique.exploration_initial_eps,
+                        exploration_final_eps=self.selected_technique.exploration_final_eps,
+                        max_grad_norm=self.selected_technique.max_grad_norm,
                         device=self.device,
                         tensorboard_log=self.log_dir,
                         verbose=1)
 
-        if self.technique.curriculum_learning:
+        if self.selected_technique.curriculum_learning:
             from Training import CurriculumLearning
 
             model = CurriculumLearning.CurriculumLearning(timesteps=int(timesteps / 4),
@@ -110,18 +115,18 @@ class Doom_Models:
 
         doom.close()
 
-    def myTest(self, model_name: str, episodes: int) -> None:
-        doom = ViZDoom_Gym(self.level, render=True, reward_shaping=self.technique.reward_shaping)
-        model = None
+    def myTest(self, trained_model_name: str, episodes: int) -> None:
+        doom = ViZDoom_Gym(self.level, render=True, reward_shaping=self.selected_technique.reward_shaping)
+        trained_model = None
 
-        if self.technique.__class__.__name__ in ["PPO_Standard", "PPO_RewardShaping", "PPO_ResNet",
+        if self.selected_technique.__class__.__name__ in ["PPO_Standard", "PPO_RewardShaping", "PPO_ResNet",
                                                  "PPO_Curriculum"]:
             from stable_baselines3 import PPO
-            model = PPO.load(f'./Data/Train/train_{self.level}/{model_name}')
+            trained_model = PPO.load(f'./Data/Train/train_{self.level}/{trained_model_name}')
 
-        elif self.technique.__class__.__name__ == "DQN_Standard":
+        elif self.selected_technique.__class__.__name__ == "DQN_Standard":
             from stable_baselines3 import DQN
-            model = DQN.load(f'./Data/Train/train_{self.level}/{model_name}')
+            trained_model = DQN.load(f'./Data/Train/train_{self.level}/{trained_model_name}')
 
         avg_model_score = 0
         for episode in range(episodes):
@@ -131,7 +136,7 @@ class Doom_Models:
             while not done:
                 if isinstance(obs, tuple):
                     obs = obs[0]
-                action, _ = model.predict(obs)
+                action, _ = trained_model.predict(obs)
                 obs, reward, done, _, info = doom.step(action)
                 time.sleep(0.05)
                 total_reward += reward

@@ -6,11 +6,16 @@ from Other import CMD
 class Doom_Levels:
     def __init__(self):
         self.level = CMD.level_selector()
-        self.technique = CMD.technique_selector()
         self.mode = CMD.mode_selector()
 
+        self.technique = CMD.technique_selector()
+
         if self.mode == 'test':
-            self.model, self.episodes = CMD.modelAndEpisodes_selector()
+            self.trained_model, self.episodes = CMD.modelAndEpisodes_selector()
+
+        self.model = Doom_Models(level=self.level,
+                                 render=CMD.render_selector(),
+                                 display_rewards=CMD.displayRewards_selector())
 
     def basic(self):
         print("\nDescription:\n"
@@ -26,13 +31,13 @@ class Doom_Levels:
         elif self.technique == 'PPO_RewardShaping':
             selected_technique = Techniques.PPO_RewardShaping()
 
-        model = Doom_Models(level=self.level, technique=selected_technique)
+        self.model.set_technique(technique=selected_technique)
 
         if self.mode == 'train':
             # model.myTrain(timesteps=100000)
-            model.myTrain(timesteps=250000)
+            self.model.myTrain(timesteps=250000)
         elif self.mode == 'test':
-            model.myTest(model_name=self.model, episodes=self.episodes)
+            self.model.myTest(trained_model_name=self.trained_model, episodes=self.episodes)
 
     def defend_the_center(self, number_of_actions: int = 3):
         print("\nDescription:\n"
@@ -43,17 +48,17 @@ class Doom_Levels:
         selected_technique = None
 
         if self.technique == 'PPO_Standard':
-            selected_technique = Techniques.PPO_Standard(number_of_actions)
+            selected_technique = Techniques.PPO_Standard(number_of_actions=number_of_actions)
         elif self.technique == 'PPO_RewardShaping':
             selected_technique = Techniques.PPO_RewardShaping()
 
-        model = Doom_Models(level=self.level, technique=selected_technique)
+        self.model.set_technique(technique=selected_technique)
 
         if self.mode == 'train':
             # model.myTrain(timesteps=100000)
-            model.myTrain(timesteps=250000)
+            self.model.myTrain(timesteps=250000)
         elif self.mode == 'test':
-            model.myTest(model_name=self.model, episodes=self.episodes)
+            self.model.myTest(trained_model_name=self.trained_model, episodes=self.episodes)
 
     def deadly_corridor(self, actions: int = 7):
         print("\nDescription:\n"
@@ -90,12 +95,12 @@ class Doom_Levels:
             selected_technique = Techniques.DQN_Standard(number_of_actions=actions,
                                                          buffer_size=10_000)
 
-        model = Doom_Models(level=self.level, technique=selected_technique, render=True)
+        self.model.set_technique(technique=selected_technique)
 
         if self.mode == 'train':
-            model.myTrain(timesteps=250000)
+            self.model.myTrain(timesteps=250000)
         elif self.mode == 'test':
-            model.myTest(model_name=self.model, episodes=self.episodes)
+            self.model.myTest(trained_model_name=self.trained_model, episodes=self.episodes)
 
     def deathmatch(self):
         print("\nDescription:\n"
@@ -111,12 +116,12 @@ class Doom_Levels:
         elif self.technique == 'PPO_RewardShaping':
             selected_technique = Techniques.PPO_RewardShaping()
 
-        model = Doom_Models(level=self.level, technique=selected_technique)
+        self.model.set_technique(technique=selected_technique)
 
         if self.mode == 'train':
-            model.myTrain(timesteps=200000)
+            self.model.myTrain(timesteps=200000)
         elif self.mode == 'test':
-            model.myTest(model_name=self.model, episodes=self.episodes)
+            self.model.myTest(trained_model_name=self.trained_model, episodes=self.episodes)
 
     def defend_the_line(self):
         print("\nDescription:\n"
@@ -136,12 +141,12 @@ class Doom_Levels:
         elif self.technique == 'PPO_RewardShaping':
             selected_technique = Techniques.PPO_RewardShaping()
 
-        model = Doom_Models(level=self.level, technique=selected_technique)
+        self.model.set_technique(technique=selected_technique)
 
         if self.mode == 'train':
-            model.myTrain(timesteps=250000)
+            self.model.myTrain(timesteps=250000)
         elif self.mode == 'test':
-            model.myTest(model_name=self.model, episodes=self.episodes)
+            self.model.myTest(trained_model_name=self.trained_model, episodes=self.episodes)
 
     def health_gathering(self):
         pass

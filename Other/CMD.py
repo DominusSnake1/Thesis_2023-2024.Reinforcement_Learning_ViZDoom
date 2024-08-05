@@ -91,3 +91,21 @@ def modelAndEpisodes_selector() -> tuple:
         raise Exception("Please provide a positive number of episodes.")
 
     return args[7], int(args[9])
+
+
+def render_selector():
+    args = sys.argv[1:]
+
+    if "-r" in args:
+        return True
+
+    return False
+
+
+def displayRewards_selector():
+    args = sys.argv[1:]
+
+    if "-d" in args:
+        return True
+
+    return False

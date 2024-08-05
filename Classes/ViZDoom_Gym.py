@@ -1,16 +1,22 @@
-import os.path
-
 from gymnasium.spaces import Discrete, Box
 from gymnasium import Env
 import vizdoom as vzd
 import numpy as np
+import os.path
 from icecream import ic
 
 
 class ViZDoom_Gym(Env):
-    def __init__(self, level, render=False, reward_shaping=False, curriculum=False):
+    def __init__(self,
+                 level: str,
+                 render: bool = False,
+                 display_rewards: bool = False,
+                 reward_shaping: bool = False,
+                 curriculum: bool = False):
+
         super().__init__()
         self.level = level
+        self.display_rewards = display_rewards
         self.reward_shaping = reward_shaping
         self.use_curriculum = curriculum
         self.game = vzd.DoomGame()
@@ -44,18 +50,20 @@ class ViZDoom_Gym(Env):
         return getattr(RewardShaping, self.level)(self, game_variables)
 
     def step(self, action):
-        reward = self.game.make_action(self.actions[action], tics=4)
+        base_reward = self.game.make_action(self.actions[action], tics=4)
+        total_reward = base_reward
+        extra_reward = 0
 
         state = self.game.get_state()
 
         if state is not None:
             self.observation_space = state.screen_buffer
-            # state = grayscale(state)
 
             game_variables = state.game_variables
 
             if self.reward_shaping:
-                reward += self.__reward_shaping(game_variables)
+                extra_reward = self.__reward_shaping(game_variables)
+                total_reward += extra_reward
         else:
             self.observation_space = np.zeros(self.observation_space.shape, dtype=np.uint8)
             game_variables = 0
@@ -64,14 +72,23 @@ class ViZDoom_Gym(Env):
         info = {"info": game_variables}
         truncated = False
 
-        print("reward:", reward)
-        return self.observation_space, reward, done, truncated, info
+        if self.display_rewards:
+            self.print_rewards(base_reward, extra_reward)
+
+        return self.observation_space, total_reward, done, truncated, info
 
     def reset(self, seed=None, options=None):
         self.game.new_episode()
         screen_buffer = self.game.get_state().screen_buffer
         return screen_buffer, 0
-        # return grayscale(state), 0
 
     def close(self):
         self.game.close()
+
+    def print_rewards(self, base_reward, extra_reward):
+        print(f"BASE Reward: {base_reward}")
+
+        if self.reward_shaping:
+            print(f"EXTRA Reward: {extra_reward}")
+
+        print("================================================")

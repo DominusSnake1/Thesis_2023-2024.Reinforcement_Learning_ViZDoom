@@ -11,7 +11,7 @@ def deadly_corridor(self: ViZDoom_Gym, game_variables: list) -> float:
     """
     # Unpack the game variables.
     health, killcount, ammo = game_variables
-    print(f"HEALTH:{health}, KILLS:{killcount}, AMMO:{ammo}")
+    print(f"HEALTH: {health}, KILLS: {killcount}, AMMO: {ammo}")
 
     # Initialise the deltas.
     killcount_delta = 0
