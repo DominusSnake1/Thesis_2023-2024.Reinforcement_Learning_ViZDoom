@@ -71,7 +71,7 @@ class Doom_Levels:
 
         if self.technique == 'PPO_Standard':
             selected_technique = Techniques.PPO_Standard(number_of_actions=actions,
-                                                         batch_size=256,
+                                                         batch_size=128,
                                                          n_steps=8192,
                                                          learning_rate=0.0003,
                                                          ent_coef=0.01,
