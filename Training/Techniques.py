@@ -1,3 +1,6 @@
+import Training.CNNFeatureExtractor
+
+
 class BASE_PPO:
     def __init__(self,
                  number_of_actions: int,
@@ -30,6 +33,7 @@ class BASE_PPO:
 
         # Policy used by the model.
         self.policy = "CnnPolicy"
+        self.policy_kwargs = None
 
         # Reward shaping is not used.
         self.reward_shaping = False
@@ -68,6 +72,16 @@ class PPO_Curriculum(BASE_PPO):
         self.curriculum_learning = True
 
 
+class PPO_CustomCNN(BASE_PPO):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.policy = Training.CNNFeatureExtractor.CustomCNN_Policy
+
+        self.algorithm = "PPO-CNN"
+
+        self.policy_kwargs = {'features_extractor_kwargs': {'number_of_actions': self.number_of_actions}}
+
+
 class BASE_DQN:
     def __init__(self,
                  number_of_actions: int,
@@ -82,7 +96,6 @@ class BASE_DQN:
                  exploration_initial_eps: float = 1.0,
                  exploration_final_eps: float = 0.05,
                  max_grad_norm: float = 10):
-
         self.number_of_actions = number_of_actions
         self.learning_rate = learning_rate
         self.buffer_size = buffer_size

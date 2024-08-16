@@ -6,6 +6,13 @@ import os.path
 from icecream import ic
 
 
+def process_observation(observation):
+    obs = observation.astype(np.float32)
+    obs /= 255.0
+    obs -= 0.5
+    return obs
+
+
 class ViZDoom_Gym(Env):
     def __init__(self,
                  level: str,
@@ -36,7 +43,7 @@ class ViZDoom_Gym(Env):
         self.game.set_window_visible(render)
 
         self.game.set_screen_resolution(vzd.ScreenResolution.RES_320X240)
-        self.observation_space = Box(low=0.0, high=1.0, shape=(3, 240, 320), dtype=np.float32)
+        self.observation_space = Box(low=0, high=255, shape=(3, 240, 320), dtype=np.uint8)
         self.action_space = Discrete(self.game.get_available_buttons_size())
         self.actions = np.identity(self.game.get_available_buttons_size(), dtype=np.uint8)
 
@@ -49,7 +56,7 @@ class ViZDoom_Gym(Env):
 
     def step(self, action):
         # Get the BASE Reward from the level depending on the action taken.
-        base_reward = self.game.make_action(self.actions[action], tics=4)
+        base_reward = round(self.game.make_action(self.actions[action], tics=5), 3)
 
         # Extract the current state of the game.
         state = self.game.get_state()
@@ -59,12 +66,12 @@ class ViZDoom_Gym(Env):
         # If there is no current_state, enter...
         if state is None:
             # Initialize the observation space to zeroes.
-            self.observation_space = np.zeros(self.observation_space.shape, dtype=np.float32)
+            self.observation_space = np.zeros(self.observation_space.shape, dtype=np.uint8)
             # Returns Observation, Reward, Done, Truncated, Info
             return self.observation_space, base_reward, done, False, {"info": 0}
 
-        # Normalize from [0 , 1] to [-0.5 , 0.5].
-        self.observation_space = (state.screen_buffer - 0.5)
+        # Normalize from [0.0 , 1.0] to [-0.5 , 0.5].
+        self.observation_space = process_observation(state.screen_buffer)
         # Extract the game variables from the current state.
         game_variables = state.game_variables
 
@@ -90,8 +97,9 @@ class ViZDoom_Gym(Env):
 
     def reset(self, seed=None, options=None):
         self.game.new_episode()
-        screen_buffer = self.game.get_state().screen_buffer
-        return screen_buffer, 0
+        state = self.game.get_state()
+        observation = process_observation(state.screen_buffer)
+        return observation, 0
 
     def close(self):
         """
@@ -111,6 +119,5 @@ class ViZDoom_Gym(Env):
         print(f"BASE Reward: {base_reward}")
 
         if self.reward_shaping:
-            print(f"EXTRA Reward: {extra_reward}")
+            print(f"\tEXTRA Reward: {extra_reward}")
 
-        print("================================================")

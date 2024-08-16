@@ -70,10 +70,11 @@ class Doom_Levels:
         selected_technique = None
 
         if self.technique == 'PPO_Standard':
+            # ent_coef < 0.1
             selected_technique = Techniques.PPO_Standard(number_of_actions=actions,
-                                                         batch_size=128,
+                                                         batch_size=256,
                                                          n_steps=8192,
-                                                         learning_rate=0.0003,
+                                                         learning_rate=0.0001,
                                                          ent_coef=0.01,
                                                          clip_range=0.1,
                                                          gamma=0.95,
@@ -90,6 +91,9 @@ class Doom_Levels:
                                                            clip_range=0.1,
                                                            gamma=0.95,
                                                            gae_lambda=0.9)
+
+        elif self.technique == 'PPO_CustomCNN':
+            selected_technique = Techniques.PPO_CustomCNN(number_of_actions=actions)
 
         elif self.technique == 'DQN_Standard':
             selected_technique = Techniques.DQN_Standard(number_of_actions=actions,
