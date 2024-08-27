@@ -50,3 +50,9 @@ python ./main.py -lvl SELECT_LEVEL -m train -t YOUR_TECHNIQUE -r -d
 ```bash
 python ./main.py -lvl SELECT_LEVEL -m test -t YOUR_TECHNIQUE -mdl YOUR_MODEL -eps X -r -d
 ```
+
+## Display the map layout
+In case the layout of the scenario map is needed:
+```bash
+python ./DisplayMapLayout CHOOSETHEMAP 
+```

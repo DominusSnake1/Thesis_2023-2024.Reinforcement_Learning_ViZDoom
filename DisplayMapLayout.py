@@ -2,20 +2,17 @@ from argparse import ArgumentParser
 import vizdoom as vzd
 import cv2
 
-parser = ArgumentParser(
-    "ViZDoom example showing how to use the 'automap' (top-down view map)."
-)
+parser = ArgumentParser()
+
 parser.add_argument(
-    dest="config",
-    help="Path to the configuration file of the scenario."
-    " Please see "
-    "../../scenarios/*cfg for more scenarios.",
+    dest="scenario",
+    help="The scenario whose map is to be displayed",
 )
 
 args = parser.parse_args()
 game = vzd.DoomGame()
 
-game.load_config(args.config)
+game.load_config(args.scenario)
 game.set_render_hud(False)
 
 game.set_screen_resolution(vzd.ScreenResolution.RES_1024X576)
