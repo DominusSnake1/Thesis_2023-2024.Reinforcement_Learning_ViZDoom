@@ -4,8 +4,18 @@ import vizdoom as vzd
 
 def deadly_corridor(self: ViZDoom_Gym):
     self.game.add_available_game_variable(vzd.KILLCOUNT)
-    self.game.add_available_game_variable(vzd.SELECTED_WEAPON_AMMO)
-    self.game.set_living_reward(-1)
+    self.game.add_available_game_variable(vzd.HITS_TAKEN)
+    self.game.add_available_game_variable(vzd.ARMOR)
+    self.game.add_available_game_variable(vzd.POSITION_X)
 
     setattr(self, 'killcount', 0)
-    setattr(self, 'ammo', 52)
+    setattr(self, 'hits_taken', 0)
+    setattr(self, 'X_position', 0)
+
+
+def defend_the_center(self: ViZDoom_Gym):
+    self.game.add_available_game_variable(vzd.KILLCOUNT)
+
+    setattr(self, 'killcount', 0)
+    setattr(self, 'previous_ammo', 26)
+    setattr(self, 'previous_health', 100)

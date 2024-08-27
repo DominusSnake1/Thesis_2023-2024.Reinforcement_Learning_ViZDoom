@@ -29,37 +29,50 @@ class ViZDoom_Gym(Env):
         self.game = vzd.DoomGame()
         self.game.set_doom_game_path('Other/DOOM2.WAD')
 
-        cfg = f'ViZDoom/scenarios/{level}.cfg'
-
-        if self.use_curriculum and os.path.exists(f'Levels/LevelsCurriculum/{level}.cfg'):
-            cfg = f'Levels/LevelsCurriculum/{level}.cfg'
-
-        self.game.load_config(cfg)
+        self.load_config()
 
         if self.reward_shaping:
-            from Training import LevelAdjustments
-            getattr(LevelAdjustments, self.level)(self)
-
-        self.game.set_window_visible(render)
+            self.prepare_reward_shaping()
 
         self.game.set_screen_resolution(vzd.ScreenResolution.RES_320X240)
         self.observation_space = Box(low=0, high=255, shape=(3, 240, 320), dtype=np.uint8)
         self.action_space = Discrete(self.game.get_available_buttons_size())
         self.actions = np.identity(self.game.get_available_buttons_size(), dtype=np.uint8)
 
+        self.game.set_window_visible(render)
+
         self.game.init()
+
+    def load_config(self):
+        if self.use_curriculum and os.path.exists(f'Levels/LevelsCurriculum/{self.level}.cfg'):
+            cfg = f'Levels/LevelsCurriculum/{self.level}.cfg'
+        else:
+            cfg = f'ViZDoom/scenarios/{self.level}.cfg'
+
+        self.game.load_config(cfg)
+
+    def prepare_reward_shaping(self):
+        from Training import LevelAdjustments
+        level = self.level
+
+        if self.use_curriculum:
+            level = level[:-3]
+
+        return getattr(LevelAdjustments, level)(self)
 
     def __reward_shaping(self, game_variables: np.ndarray) -> float:
         from Training import RewardShaping
+        level = self.level
 
-        return getattr(RewardShaping, self.level)(self, game_variables)
+        if self.use_curriculum:
+            level = level[:-3]
+
+        return getattr(RewardShaping, level)(self, game_variables)
 
     def step(self, action):
-        # Get the BASE Reward from the level depending on the action taken.
-        base_reward = round(self.game.make_action(self.actions[action], tics=5), 3)
-
         # Extract the current state of the game.
         state = self.game.get_state()
+
         # Get whether the episode is finished.
         done = self.game.is_episode_finished()
 
@@ -68,32 +81,27 @@ class ViZDoom_Gym(Env):
             # Initialize the observation space to zeroes.
             self.observation_space = np.zeros(self.observation_space.shape, dtype=np.uint8)
             # Returns Observation, Reward, Done, Truncated, Info
-            return self.observation_space, base_reward, done, False, {"info": 0}
+            return self.observation_space, 0, done, False, {"info": 0}
 
-        # Normalize from [0.0 , 1.0] to [-0.5 , 0.5].
+        # Normalize from int [0 , 255] to float [-0.5 , 0.5].
         self.observation_space = process_observation(state.screen_buffer)
+
+        self.game.set_action(action=self.actions[action])
+        self.game.advance_action(tics=4)
+
         # Extract the game variables from the current state.
         game_variables = state.game_variables
 
-        # Initialize the TOTAL Reward (BASE + EXTRA), in case of Reward Shaping.
-        total_reward = base_reward
-        # Initialize the EXTRA Reward, in case of Reward Shaping.
-        extra_reward = 0
-
-        # If selected Technique features Reward Shaping, enter...
-        if self.reward_shaping:
-            # Get the EXTRA Reward from the custom Reward Function.
-            extra_reward = self.__reward_shaping(game_variables)
-            # Add the EXTRA Reward to the BASE Reward.
-            total_reward += extra_reward
+        # Calculates the reward with the Default or the Custom Reward Function.
+        reward = self.calculate_reward(game_variables=game_variables)
 
         # If the user wants the rewards to be displayed, enter...
         if self.display_rewards:
-            # Display the BASE Reward and the EXTRA Reward (in case of Reward Shaping)
-            self.__display_rewards(base_reward, extra_reward)
+            # Display the BASE Reward and the CUSTOM Reward (in case of Reward Shaping)
+            self.__display_rewards(reward)
 
         # Returns Observation, Reward, Done, Truncated, Info
-        return self.observation_space, total_reward, done, False, {"info": game_variables}
+        return self.observation_space, reward, done, False, {"info": game_variables}
 
     def reset(self, seed=None, options=None):
         self.game.new_episode()
@@ -107,17 +115,34 @@ class ViZDoom_Gym(Env):
         """
         self.game.close()
 
-    def __display_rewards(self, base_reward, extra_reward):
+    def calculate_reward(self, game_variables):
+        """
+        Calculates the reward for each step depending on whether the training uses Reward Shaping or not.
+        If Reward Shaping is used, then a Custom Reward function is utilized, overwriting the default reward function.
+
+        :param game_variables: The game variables of the environment
+        """
+        # Get the BASE Reward from the level depending on the action taken.
+        reward = round(self.game.get_last_reward(), 3)
+
+        # If reward shaping is used, enter...
+        if self.reward_shaping:
+            # Get the reward from the Custom Reward function.
+            reward = self.__reward_shaping(game_variables)
+
+        return reward
+
+    def __display_rewards(self, reward):
         """
         Displays the BASE reward for each step.
 
         If the used technique features Reward Shaping, then the EXTRA reward is also displayed.
 
-        :param base_reward: The reward from the level.
-        :param extra_reward: The reward from the custom reward function.
+        :param reward: The reward from the level.
         """
-        print(f"BASE Reward: {base_reward}")
+        if not self.reward_shaping:
+            print(f"BASE Reward: {reward}")
+            return
 
-        if self.reward_shaping:
-            print(f"\tEXTRA Reward: {extra_reward}")
-
+        print(f"CUSTOM Reward: {reward}")
+        return

@@ -30,15 +30,23 @@ python ./Other/test_rocm.py
 ```
 
 ## <u>Step 5</u>:<br>Run the program in either training or testing mode.
-### * Training Mode.
-You can also view real-time graphs of the training process by navigating to `Data/Logs/PICKYOURLEVEL/SELECTPPO`.
+You can also view real-time graphs of the training process using TensorBoard.
 ```bash
 gnome-terminal -- sh -c 'cd Data/Logs/ | tensorboard --logdir=.'
 ```
+___
+The base command for the terminal is:
+`main.py -lvl LEVEL -m MODE -t TECHNIQUE [-mdl MODEL] [-eps EPISODES] [-r] [-d]`
+
+If help is needed, type `main.py -h` or `main.py --help` for a quick explanation of the commands.
+
+### Example Usage:
+#### * Training Mode.
 ```bash
-python ./main.py -lvl SELECT_LEVEL -m train -t YOUR_TECHNIQUE -d -r
+python ./main.py -lvl SELECT_LEVEL -m train -t YOUR_TECHNIQUE -r -d
 ```
-### * Testing Mode. (Pick a model from `Data/Train/PICKYOURLEVEL`)
+#### * Testing Mode.
+(Pick a model from `Data/Train/PICK_YOUR_LEVEL`)
 ```bash
-python ./main.py -lvl SELECT_LEVEL -m test -t YOUR_TECHNIQUE -mdl YOUR_MODEL -eps X
+python ./main.py -lvl SELECT_LEVEL -m test -t YOUR_TECHNIQUE -mdl YOUR_MODEL -eps X -r -d
 ```

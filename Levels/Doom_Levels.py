@@ -5,17 +5,19 @@ from Other import CMD
 
 class Doom_Levels:
     def __init__(self):
-        self.level = CMD.level_selector()
-        self.mode = CMD.mode_selector()
+        configuration = CMD.parse_arguments()
 
-        self.technique = CMD.technique_selector()
+        self.level = configuration['level']
+        self.mode = configuration['mode']
+
+        self.technique = configuration['technique']
 
         if self.mode == 'test':
-            self.trained_model, self.episodes = CMD.modelAndEpisodes_selector()
+            self.trained_model, self.episodes = configuration['model'], configuration['episodes']
 
         self.model = Doom_Models(level=self.level,
-                                 render=CMD.render_selector(),
-                                 display_rewards=CMD.displayRewards_selector())
+                                 render=configuration['render'],
+                                 display_rewards=configuration['display_rewards'])
 
     def basic(self):
         print("\nDescription:\n"
@@ -50,7 +52,14 @@ class Doom_Levels:
         if self.technique == 'PPO_Standard':
             selected_technique = Techniques.PPO_Standard(number_of_actions=number_of_actions)
         elif self.technique == 'PPO_RewardShaping':
-            selected_technique = Techniques.PPO_RewardShaping()
+            selected_technique = Techniques.PPO_RewardShaping(number_of_actions=number_of_actions,
+                                                              batch_size=256,
+                                                              n_steps=4096,
+                                                              learning_rate=0.0002,
+                                                              ent_coef=0.0001,
+                                                              clip_range=0.1,
+                                                              gamma=0.995,
+                                                              gae_lambda=0.95)
 
         self.model.set_technique(technique=selected_technique)
 
@@ -60,7 +69,7 @@ class Doom_Levels:
         elif self.mode == 'test':
             self.model.myTest(trained_model_name=self.trained_model, episodes=self.episodes)
 
-    def deadly_corridor(self, actions: int = 7):
+    def deadly_corridor(self, actions: int = 7, doom_skill: int = 5):
         print("\nDescription:\n"
               "The map is a corridor with shooting monsters on both sides (6 monsters in total). A green vest is "
               "placed at the opposite end of the corridor. The reward is proportional (negative or positive) to the "
@@ -70,7 +79,6 @@ class Doom_Levels:
         selected_technique = None
 
         if self.technique == 'PPO_Standard':
-            # ent_coef < 0.1
             selected_technique = Techniques.PPO_Standard(number_of_actions=actions,
                                                          batch_size=256,
                                                          n_steps=8192,
@@ -81,9 +89,17 @@ class Doom_Levels:
                                                          gae_lambda=0.9)
         elif self.technique == 'PPO_RewardShaping':
             selected_technique = Techniques.PPO_RewardShaping(number_of_actions=actions,
-                                                              ent_coef=0.01)
+                                                              batch_size=256,
+                                                              n_steps=4096,
+                                                              learning_rate=0.0002,
+                                                              ent_coef=0.001,
+                                                              clip_range=0.05,
+                                                              gamma=0.99,
+                                                              gae_lambda=0.9)
+
         elif self.technique == 'PPO_Curriculum':
             selected_technique = Techniques.PPO_Curriculum(number_of_actions=actions,
+                                                           default_skill=doom_skill,
                                                            batch_size=256,
                                                            n_steps=8192,
                                                            learning_rate=0.0002,
@@ -92,6 +108,16 @@ class Doom_Levels:
                                                            gamma=0.95,
                                                            gae_lambda=0.9)
 
+        elif self.technique == 'PPO_RewardShaping_and_Curriculum':
+            selected_technique = Techniques.PPO_RewardShaping_and_Curriculum(number_of_actions=actions,
+                                                                             default_skill=doom_skill,
+                                                                             batch_size=256,
+                                                                             n_steps=8192,
+                                                                             learning_rate=0.0002,
+                                                                             ent_coef=0.01,
+                                                                             clip_range=0.1,
+                                                                             gamma=0.95,
+                                                                             gae_lambda=0.9)
         elif self.technique == 'PPO_CustomCNN':
             selected_technique = Techniques.PPO_CustomCNN(number_of_actions=actions)
 
@@ -102,11 +128,11 @@ class Doom_Levels:
         self.model.set_technique(technique=selected_technique)
 
         if self.mode == 'train':
-            self.model.myTrain(timesteps=250000)
+            self.model.myTrain(timesteps=5000)
         elif self.mode == 'test':
             self.model.myTest(trained_model_name=self.trained_model, episodes=self.episodes)
 
-    def deathmatch(self):
+    def deathmatch(self, number_of_actions: int = 17, doom_skill: int = 3):
         print("\nDescription:\n"
               "In this scenario, the agent is spawned in the random place of the arena filled with "
               "resources. A random monster is spawned every few seconds that will try to kill the player. The reward "
@@ -116,14 +142,24 @@ class Doom_Levels:
         selected_technique = None
 
         if self.technique == 'PPO_Standard':
-            selected_technique = Techniques.PPO_Standard()
+            selected_technique = Techniques.PPO_Standard(batch_size=256,
+                                                         n_steps=8192,
+                                                         learning_rate=0.0003,
+                                                         ent_coef=0.001,
+                                                         clip_range=0.1,
+                                                         gamma=0.95,
+                                                         gae_lambda=0.9)
         elif self.technique == 'PPO_RewardShaping':
             selected_technique = Techniques.PPO_RewardShaping()
+        elif self.technique == 'PPO_Curriculum':
+            selected_technique = Techniques.PPO_Curriculum(default_skill=doom_skill)
+        elif self.technique == 'PPO_CustomCNN':
+            selected_technique = Techniques.PPO_CustomCNN(number_of_actions=number_of_actions)
 
         self.model.set_technique(technique=selected_technique)
 
         if self.mode == 'train':
-            self.model.myTrain(timesteps=200000)
+            self.model.myTrain(timesteps=400000)
         elif self.mode == 'test':
             self.model.myTest(trained_model_name=self.trained_model, episodes=self.episodes)
 

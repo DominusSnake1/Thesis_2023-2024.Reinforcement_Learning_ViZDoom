@@ -1,10 +1,13 @@
 from Classes.ViZDoom_Gym import ViZDoom_Gym
 from Classes import TrainAndLog_Callback
+from gymnasium import Env, spaces
 from Models import Doom_Models
+import numpy as np
 
 
 def CurriculumLearning(timesteps: int,
                        level: str,
+                       default_skill: int,
                        model: Doom_Models,
                        callback: TrainAndLog_Callback,
                        render: bool,
@@ -12,7 +15,7 @@ def CurriculumLearning(timesteps: int,
                        reward_shaping: bool,
                        log_name: str):
 
-    first_level = f'{level}_s1'
+    first_level = f"{level}_s1"
 
     doom = ViZDoom_Gym(level=first_level,
                        render=render,
@@ -31,8 +34,8 @@ def CurriculumLearning(timesteps: int,
 
     doom.close()
 
-    # For Doom Skill (difficulty) 2 to 5.
-    for skill in range(2, 6):
+    # For Doom Skill (difficulty) 2 to the default difficulty for that level.
+    for skill in range(2, (default_skill + 1)):
         next_level = f'{level}_s{skill}'
 
         doom = ViZDoom_Gym(level=next_level,
@@ -45,7 +48,7 @@ def CurriculumLearning(timesteps: int,
 
         print(f"\nTraining on sub-level: {doom.level}...")
 
-        progression_timesteps = int(timesteps/10)
+        progression_timesteps = int(timesteps / 10)
 
         model.learn(total_timesteps=progression_timesteps,
                     callback=callback,
@@ -54,3 +57,19 @@ def CurriculumLearning(timesteps: int,
                     reset_num_timesteps=False)
 
         doom.close()
+
+
+class Blank_Env(Env):
+    def __init__(self, actions):
+        super(Blank_Env, self).__init__()
+        self.action_space = spaces.Discrete(actions)
+        self.observation_space = spaces.Box(low=0, high=255, shape=(240, 320, 3), dtype=np.uint8)
+
+        def reset(self):
+            return np.zeros(self.observation_space.shape)
+
+        def step(self, action):
+            return np.zeros(self.observation_space.shape), 0, True, False, {}
+
+        def render(self):
+            pass

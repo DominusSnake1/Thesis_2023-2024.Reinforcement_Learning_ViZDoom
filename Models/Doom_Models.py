@@ -1,5 +1,7 @@
 from Classes.TrainAndLog_Callback import TrainAndLog_Callback
 from Classes.ViZDoom_Gym import ViZDoom_Gym
+import Training.CNNFeatureExtractor as CCNN
+import Training.CurriculumLearning as CL
 from Other.Utils import timer
 import torch
 import time
@@ -26,6 +28,7 @@ class Doom_Models:
 
         # Initialize the model variable.
         model = None
+
         # Initialize the callback in order to save the progress of the model.
         callback = TrainAndLog_Callback(model_name=self.selected_technique.algorithm,
                                         check_freq=25000,
@@ -36,23 +39,35 @@ class Doom_Models:
         # Initialize the name of the log file according to the datetime and the technique used.
         log_name = f'{callback.get_formatted_datetime()}_{self.selected_technique.algorithm}'
 
-        # Initialize the environment.
-        doom = ViZDoom_Gym(level=self.level,
-                           render=self.render,
-                           display_rewards=self.display_rewards,
-                           reward_shaping=self.selected_technique.reward_shaping,
-                           curriculum=self.selected_technique.curriculum_learning)
-
         # Initialize the corresponding model name, according to the selected technique,
         algorithm = self.selected_technique.algorithm[:3]
 
         if algorithm == 'PPO':
-            model = self.init_PPO_model(environment=doom)
+            model = self.init_PPO_model()
         elif algorithm == 'DQN':
-            model = self.init_DQN_model(environment=doom)
+            model = self.init_DQN_model()
 
-        # If Curriculum Learning IS NOT used, train normally.
-        if not self.selected_technique.curriculum_learning:
+        if self.selected_technique.curriculum_learning:
+            CL.CurriculumLearning(timesteps=timesteps,
+                                  render=self.render,
+                                  display_rewards=self.display_rewards,
+                                  reward_shaping=self.selected_technique.reward_shaping,
+                                  level=self.level,
+                                  default_skill=self.selected_technique.default_skill,
+                                  log_name=log_name,
+                                  callback=callback,
+                                  model=model)
+
+        else:
+            # Initialize the environment.
+            doom = ViZDoom_Gym(level=self.level,
+                               render=self.render,
+                               display_rewards=self.display_rewards,
+                               reward_shaping=self.selected_technique.reward_shaping,
+                               curriculum=self.selected_technique.curriculum_learning)
+
+            model.set_env(env=doom)
+
             model.learn(total_timesteps=timesteps,
                         callback=callback,
                         tb_log_name=log_name,
@@ -60,22 +75,6 @@ class Doom_Models:
                         reset_num_timesteps=True)
 
             doom.close()
-
-        # If Curriculum Learning IS used, train with increasing difficulty.
-        else:
-            # Close the original environment, since new ones are going to be created for each difficulty level.
-            doom.close()
-
-            # Train using Curriculum Learning with new environments for each difficulty level.
-            import Training.CurriculumLearning as CL
-            CL.CurriculumLearning(timesteps=timesteps,
-                                  render=self.render,
-                                  display_rewards=self.display_rewards,
-                                  reward_shaping=self.selected_technique.reward_shaping,
-                                  level=self.level,
-                                  log_name=log_name,
-                                  callback=callback,
-                                  model=model)
 
     def myTest(self, trained_model_name: str, episodes: int) -> None:
         # Initialize the environment.
@@ -94,10 +93,10 @@ class Doom_Models:
         # Close the environment.
         doom.close()
 
-    def init_PPO_model(self, environment):
+    def init_PPO_model(self):
         from stable_baselines3 import PPO
 
-        model = PPO(env=environment,
+        model = PPO(env=CL.Blank_Env(self.selected_technique.number_of_actions),
                     policy=self.selected_technique.policy,
                     learning_rate=self.selected_technique.learning_rate,
                     n_steps=self.selected_technique.n_steps,
@@ -106,17 +105,19 @@ class Doom_Models:
                     gamma=self.selected_technique.gamma,
                     clip_range=self.selected_technique.clip_range,
                     gae_lambda=self.selected_technique.gae_lambda,
-                    policy_kwargs=self.selected_technique.policy_kwargs,
+                    policy_kwargs={'features_extractor_class': CCNN.CNNFeatureExtractor,
+                                   'features_extractor_kwargs':
+                                       {'number_of_actions': self.selected_technique.number_of_actions}},
                     device=self.device,
                     tensorboard_log=self.log_dir,
                     verbose=1)
 
         return model
 
-    def init_DQN_model(self, environment):
+    def init_DQN_model(self):
         from stable_baselines3 import DQN
 
-        model = DQN(env=environment,
+        model = DQN(env=DummyEnv,
                     policy=self.selected_technique.policy,
                     learning_rate=self.selected_technique.learning_rate,
                     buffer_size=self.selected_technique.buffer_size,
@@ -186,4 +187,3 @@ class Doom_Models:
             avg_model_score += total_reward
             time.sleep(1)
         return round((avg_model_score / episodes), 3)
-

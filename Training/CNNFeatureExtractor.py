@@ -75,3 +75,4 @@ class CustomCNN_Policy(ActorCriticPolicy):
                                                lr_schedule,
                                                features_extractor_class=CNNFeatureExtractor,
                                                **kwargs)
+

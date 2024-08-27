@@ -1,7 +1,7 @@
-import sys
+import argparse
 
 
-def level_selector() -> str:
+def level_selector(level: str) -> str:
     """
     Returns the ViZDoom level specified in the command line prompt using the custom argument '-lvl'.
 
@@ -10,24 +10,24 @@ def level_selector() -> str:
 
     :return: level
     """
-    args = sys.argv[1:]
-    levels = ['basic', 'defend_the_center', 'deadly_corridor', 'deathmatch', 'defend_the_line']
+    levels = ['basic',
+              'defend_the_center',
+              'deadly_corridor',
+              'deathmatch',
+              'defend_the_line']
 
-    if args[0] != '-lvl':
-        raise Exception('In order to choose a level you must use \'-lvl\' tag after ./main.py.')
-
-    if (args[1] == 'SELECT_LEVEL') or (args[1] not in levels):
+    if level not in levels:
         exception_message = "Please select a level/scenario from the list:\n"
 
-        for i, level in enumerate(levels, 1):
-            exception_message += f"{i}. {level}\n"
+        for i, lvl in enumerate(levels, 1):
+            exception_message += f"{i}. {lvl}\n"
 
         raise Exception(exception_message)
 
-    return args[1]
+    return level
 
 
-def mode_selector() -> str:
+def mode_selector(mode: str) -> str:
     """
     Returns the mode specified in the command line prompt using the custom argument '-m'.
 
@@ -36,36 +36,32 @@ def mode_selector() -> str:
 
     :return: mode
     """
-    args = sys.argv[1:]
-
-    if args[2] != '-m':
-        raise Exception("In order to choose a mode you must use \'-m\' after selecting a level.")
-
-    if args[3] not in ('train', 'test'):
+    if mode not in ('train', 'test'):
         raise Exception("Please select a mode from 'train' or 'test'!")
 
-    return args[3]
+    return mode
 
 
-def technique_selector() -> str:
-    args = sys.argv[1:]
-    techniques = ['PPO_Standard', 'PPO_RewardShaping', 'PPO_Curriculum', 'PPO_CustomCNN', 'DQN_Standard']
+def technique_selector(technique: str) -> str:
+    techniques = ['PPO_Standard',
+                  'PPO_RewardShaping',
+                  'PPO_Curriculum',
+                  'PPO_RewardShaping_and_Curriculum',
+                  'PPO_CustomCNN',
+                  'DQN_Standard']
 
-    if (len(args) < 5) or (args[4] != '-t'):
-        raise Exception("In order to choose a technique you must use \'-t\' after selecting a mode.")
-
-    if (len(args) < 6) or ((args[5] == 'YOUR_TECHNIQUE') or (args[5] not in techniques)):
+    if technique not in techniques:
         exception_message = "Please select a technique from the list:\n"
 
-        for i, technique in enumerate(techniques, 1):
-            exception_message += f"{i}. {technique}\n"
+        for i, tech in enumerate(techniques, 1):
+            exception_message += f"{i}. {tech}\n"
 
         raise Exception(exception_message)
 
-    return args[5]
+    return technique
 
 
-def modelAndEpisodes_selector() -> tuple:
+def modelAndEpisodes_selector(model: str, episodes: int) -> tuple:
     """
     Returns the model and the number of episodes specified in the command line prompt
     using the custom arguments '-mdl' and '-eps'.
@@ -76,36 +72,38 @@ def modelAndEpisodes_selector() -> tuple:
 
     :return: model and number of episodes
     """
-    args = sys.argv[1:]
-
-    if (len(args) < 7) or (args[6] != '-mdl'):
-        raise Exception("In order to choose a model you must use \'-mdl\' after selecting a technique.")
-
-    if (len(args) < 8) or (args[7] == 'YOUR_MODEL_HERE'):
-        raise Exception("Please select a model from the \'Data/Train/YOURCHOSENLEVEL/YOURCHOSENMODEL\'.")
-
-    if (len(args) < 9) or (args[8] != '-eps'):
-        raise Exception("In order to choose how many episodes to test you must use \'-eps\' after selecting a model.")
-
-    if (len(args) < 10) or ((args[9] == 'X') or (int(args[9]) <= 0)):
+    if int(episodes) <= 0:
         raise Exception("Please provide a positive number of episodes.")
 
-    return args[7], int(args[9])
+    return model, int(episodes)
 
 
-def render_selector():
-    args = sys.argv[1:]
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='ViZDoom Experiment Configuration')
 
-    if "-r" in args:
-        return True
+    parser.add_argument('-lvl', '--level', type=str, required=True, help='Select the level/scenario')
+    parser.add_argument('-m', '--mode', type=str, required=True, help='Choose the mode: train or test')
+    parser.add_argument('-t', '--technique', type=str, required=True, help='Select the technique')
+    parser.add_argument('-mdl', '--model', type=str, help='Specify the model name (required for testing)')
+    parser.add_argument('-eps', '--episodes', type=int, help='Number of episodes to test (required for testing)')
+    parser.add_argument('-r', '--render', action='store_true', help='Render the game')
+    parser.add_argument('-d', '--display_rewards', action='store_true', help='Display rewards during training')
 
-    return False
+    args = parser.parse_args()
 
+    config = {
+        "level": level_selector(args.level),
+        "mode": mode_selector(args.mode),
+        "technique": technique_selector(args.technique),
+        "model": None,
+        "episodes": None,
+        "render": args.render,
+        "display_rewards": args.display_rewards
+    }
 
-def displayRewards_selector():
-    args = sys.argv[1:]
+    if config["mode"] == 'test':
+        if not args.model or not args.episodes:
+            parser.error("Testing requires both --model and --episodes arguments.")
+        config["model"], config["episodes"] = modelAndEpisodes_selector(args.model, args.episodes)
 
-    if "-d" in args:
-        return True
-
-    return False
+    return config

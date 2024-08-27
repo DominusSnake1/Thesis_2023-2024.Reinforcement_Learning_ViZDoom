@@ -4,6 +4,7 @@ import Training.CNNFeatureExtractor
 class BASE_PPO:
     def __init__(self,
                  number_of_actions: int,
+                 default_skill: int = 0,
                  learning_rate: float = 0.0003,
                  n_steps: int = 4096,
                  ent_coef: float = 0.0,
@@ -22,6 +23,7 @@ class BASE_PPO:
         :param gae_lambda:
         """
         self.number_of_actions = number_of_actions
+        self.default_skill = default_skill
         self.learning_rate = learning_rate
         self.n_steps = n_steps
         self.ent_coef = ent_coef
@@ -69,6 +71,16 @@ class PPO_Curriculum(BASE_PPO):
         self.algorithm = "PPO-CL"
 
         # Curriculum learning is not used.
+        self.curriculum_learning = True
+
+
+class PPO_RewardShaping_and_Curriculum(BASE_PPO):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.algorithm = "PPO-RW-CL"
+
+        self.reward_shaping = True
         self.curriculum_learning = True
 
 
