@@ -3,7 +3,6 @@ from gymnasium import Env
 import vizdoom as vzd
 import numpy as np
 import os.path
-from icecream import ic
 
 
 def process_observation(observation):
@@ -16,6 +15,7 @@ def process_observation(observation):
 class ViZDoom_Gym(Env):
     def __init__(self,
                  level: str,
+                 difficulty: int,
                  render: bool = False,
                  display_rewards: bool = False,
                  reward_shaping: bool = False,
@@ -30,6 +30,8 @@ class ViZDoom_Gym(Env):
         self.game.set_doom_game_path('Other/DOOM2.WAD')
 
         self.load_config()
+
+        self.game.set_doom_skill(difficulty)
 
         if self.reward_shaping:
             self.prepare_reward_shaping()

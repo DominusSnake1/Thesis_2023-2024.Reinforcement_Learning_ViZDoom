@@ -64,15 +64,20 @@ class CNNFeatureExtractor(BaseFeaturesExtractor):
         return x
 
 
-class CustomCNN_Policy(ActorCriticPolicy):
-    def __init__(self,
-                 observation_space: gym.spaces.Box,
-                 action_space: gym.spaces.Discrete,
-                 lr_schedule,
-                 **kwargs):
-        super(CustomCNN_Policy, self).__init__(observation_space,
-                                               action_space,
-                                               lr_schedule,
-                                               features_extractor_class=CNNFeatureExtractor,
-                                               **kwargs)
+def load_FE_kwargs(number_of_actions: int, use_customCNN: bool = False) -> dict:
+    """
+    Loads the feature extractor kwargs for the model.
 
+    If the user wants to use the CustomCNN, then the correct feature extractor class and kwargs are returned.
+    If the user wants to use the Default NatureCNN, then only the features_dim is altered.
+
+    :param number_of_actions: The number of actions the feature extractor will return. (features_dim)
+    :param use_customCNN: Whether to use the CustomCNN or not.
+
+    :return: A dictionary containing the policy's feature extractor kwargs.
+    """
+    if use_customCNN:
+        return {'features_extractor_class': CNNFeatureExtractor,
+                'features_extractor_kwargs': {'number_of_actions': number_of_actions}}
+
+    return {'features_extractor_kwargs': {'features_dim': number_of_actions}}

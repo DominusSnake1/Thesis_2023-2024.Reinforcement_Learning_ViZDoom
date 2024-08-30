@@ -4,7 +4,7 @@ import Training.CNNFeatureExtractor
 class BASE_PPO:
     def __init__(self,
                  number_of_actions: int,
-                 default_skill: int = 0,
+                 doom_skill: int,
                  learning_rate: float = 0.0003,
                  n_steps: int = 4096,
                  ent_coef: float = 0.0,
@@ -22,20 +22,21 @@ class BASE_PPO:
         :param gamma:
         :param gae_lambda:
         """
-        self.number_of_actions = number_of_actions
-        self.default_skill = default_skill
+        self.doom_skill = doom_skill
+
+        # PPO Parameters.
         self.learning_rate = learning_rate
         self.n_steps = n_steps
         self.ent_coef = ent_coef
-        self.batch_size = batch_size
-
         self.clip_range = clip_range
         self.gamma = gamma
         self.gae_lambda = gae_lambda
 
-        # Policy used by the model.
+        # Policy Parameters
         self.policy = "CnnPolicy"
         self.policy_kwargs = None
+        self.number_of_actions = number_of_actions
+        self.batch_size = batch_size
 
         # Reward shaping is not used.
         self.reward_shaping = False
@@ -82,16 +83,6 @@ class PPO_RewardShaping_and_Curriculum(BASE_PPO):
 
         self.reward_shaping = True
         self.curriculum_learning = True
-
-
-class PPO_CustomCNN(BASE_PPO):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.policy = Training.CNNFeatureExtractor.CustomCNN_Policy
-
-        self.algorithm = "PPO-CNN"
-
-        self.policy_kwargs = {'features_extractor_kwargs': {'number_of_actions': self.number_of_actions}}
 
 
 class BASE_DQN:

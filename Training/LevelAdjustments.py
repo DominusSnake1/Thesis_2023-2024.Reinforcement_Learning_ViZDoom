@@ -18,4 +18,10 @@ def defend_the_center(self: ViZDoom_Gym):
 
     setattr(self, 'killcount', 0)
     setattr(self, 'previous_ammo', 26)
-    setattr(self, 'previous_health', 100)
+
+
+def defend_the_line(self: ViZDoom_Gym):
+    self.game.add_available_game_variable(vzd.KILLCOUNT)
+    self.game.add_available_game_variable(vzd.CAMERA_ANGLE)
+
+    setattr(self, 'killcount', 0)

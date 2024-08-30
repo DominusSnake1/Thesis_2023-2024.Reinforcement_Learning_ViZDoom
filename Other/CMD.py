@@ -3,28 +3,30 @@ import argparse
 
 def level_selector(level: str) -> str:
     """
-    Returns the ViZDoom level specified in the command line prompt using the custom argument '-lvl'.
+    Returns the full ViZDoom level name based on the input, which can be a full or short name.
 
-    If no level or a wrong level is entered in the command line (with or without the '-lvl' tag),
-    an exception is raised.
-
-    :return: level
+    :param level: The level or short name input by the user.
+    :return: The full level name.
     """
-    levels = ['basic',
-              'defend_the_center',
-              'deadly_corridor',
-              'deathmatch',
-              'defend_the_line']
+    levels = {
+        'basic': 'b',
+        'defend_the_center': 'dtc',
+        'deadly_corridor': 'dc',
+        'deathmatch': 'dm',
+        'defend_the_line': 'dtl'
+    }
 
-    if level not in levels:
-        exception_message = "Please select a level/scenario from the list:\n"
+    # Checks whether the given level name matches any entry (full or short) in the above dictionary.
+    for full_name, short_name in levels.items():
+        if level == full_name or level == short_name:
+            return full_name
 
-        for i, lvl in enumerate(levels, 1):
-            exception_message += f"{i}. {lvl}\n"
+    # If the given level name doesn't match the entries in the dictionary, throw exception and print the dictionary.
+    exception_message = "Please select a level/scenario from the list:\n"
+    for i, (full_name, short_name) in enumerate(levels.items(), 1):
+        exception_message += f"{i}. '{full_name}' or '{short_name}'\n"
 
-        raise Exception(exception_message)
-
-    return level
+    raise Exception(exception_message)
 
 
 def mode_selector(mode: str) -> str:

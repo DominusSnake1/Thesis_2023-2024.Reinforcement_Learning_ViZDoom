@@ -15,9 +15,8 @@ def CurriculumLearning(timesteps: int,
                        reward_shaping: bool,
                        log_name: str):
 
-    first_level = f"{level}_s1"
-
-    doom = ViZDoom_Gym(level=first_level,
+    doom = ViZDoom_Gym(level=level,
+                       difficulty=1,
                        render=render,
                        display_rewards=display_rewards,
                        reward_shaping=reward_shaping,
@@ -25,7 +24,7 @@ def CurriculumLearning(timesteps: int,
 
     model.set_env(doom)
 
-    print(f"\nTraining on sub-level: {doom.level}...")
+    print(f"\nTraining on '{doom.level}' with 1/{default_skill} doom_skill...")
     model.learn(total_timesteps=timesteps,
                 callback=callback,
                 tb_log_name=log_name,
@@ -36,9 +35,8 @@ def CurriculumLearning(timesteps: int,
 
     # For Doom Skill (difficulty) 2 to the default difficulty for that level.
     for skill in range(2, (default_skill + 1)):
-        next_level = f'{level}_s{skill}'
-
-        doom = ViZDoom_Gym(level=next_level,
+        doom = ViZDoom_Gym(level=level,
+                           difficulty=skill,
                            render=render,
                            display_rewards=display_rewards,
                            reward_shaping=reward_shaping,
@@ -46,7 +44,7 @@ def CurriculumLearning(timesteps: int,
 
         model.set_env(doom)
 
-        print(f"\nTraining on sub-level: {doom.level}...")
+        print(f"\nTraining on '{doom.level}' with {skill}/{default_skill} doom_skill...")
 
         progression_timesteps = int(timesteps / 10)
 

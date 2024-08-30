@@ -54,5 +54,5 @@ python ./main.py -lvl SELECT_LEVEL -m test -t YOUR_TECHNIQUE -mdl YOUR_MODEL -ep
 ## Display the map layout
 In case the layout of the scenario map is needed:
 ```bash
-python ./DisplayMapLayout CHOOSETHEMAP 
+python ./Other/DisplayMapLayout CHOOSETHEMAP 
 ```

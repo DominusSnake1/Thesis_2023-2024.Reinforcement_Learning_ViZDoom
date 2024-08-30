@@ -1,6 +1,6 @@
 from Classes.TrainAndLog_Callback import TrainAndLog_Callback
+from Training import CNNFeatureExtractor as CNN_FE
 from Classes.ViZDoom_Gym import ViZDoom_Gym
-import Training.CNNFeatureExtractor as CCNN
 import Training.CurriculumLearning as CL
 from Other.Utils import timer
 import torch
@@ -22,7 +22,7 @@ class Doom_Models:
         self.selected_technique = technique
 
     @timer
-    def myTrain(self, timesteps: int) -> None:
+    def myTrain(self, timesteps: int, customCNN: bool = False) -> None:
         print('Starting training...')
         print('(If you wish to stop training sooner, just press CTRL+C)\n')
 
@@ -31,19 +31,23 @@ class Doom_Models:
 
         # Initialize the callback in order to save the progress of the model.
         callback = TrainAndLog_Callback(model_name=self.selected_technique.algorithm,
-                                        check_freq=25000,
+                                        check_freq=50000,
                                         level=self.level,
                                         reward_shaping=self.selected_technique.reward_shaping,
-                                        curriculum=self.selected_technique.curriculum_learning)
+                                        curriculum=self.selected_technique.curriculum_learning,
+                                        use_customCNN=customCNN)
 
         # Initialize the name of the log file according to the datetime and the technique used.
         log_name = f'{callback.get_formatted_datetime()}_{self.selected_technique.algorithm}'
+
+        if customCNN:
+            log_name += '+'
 
         # Initialize the corresponding model name, according to the selected technique,
         algorithm = self.selected_technique.algorithm[:3]
 
         if algorithm == 'PPO':
-            model = self.init_PPO_model()
+            model = self.init_PPO_model(use_custom_cnn=customCNN)
         elif algorithm == 'DQN':
             model = self.init_DQN_model()
 
@@ -53,7 +57,7 @@ class Doom_Models:
                                   display_rewards=self.display_rewards,
                                   reward_shaping=self.selected_technique.reward_shaping,
                                   level=self.level,
-                                  default_skill=self.selected_technique.default_skill,
+                                  default_skill=self.selected_technique.doom_skill,
                                   log_name=log_name,
                                   callback=callback,
                                   model=model)
@@ -61,6 +65,7 @@ class Doom_Models:
         else:
             # Initialize the environment.
             doom = ViZDoom_Gym(level=self.level,
+                               difficulty=self.selected_technique.doom_skill,
                                render=self.render,
                                display_rewards=self.display_rewards,
                                reward_shaping=self.selected_technique.reward_shaping,
@@ -79,6 +84,7 @@ class Doom_Models:
     def myTest(self, trained_model_name: str, episodes: int) -> None:
         # Initialize the environment.
         doom = ViZDoom_Gym(level=self.level,
+                           difficulty=self.selected_technique.doom_skill,
                            render=self.render,
                            display_rewards=self.display_rewards,
                            reward_shaping=self.selected_technique.reward_shaping)
@@ -93,8 +99,11 @@ class Doom_Models:
         # Close the environment.
         doom.close()
 
-    def init_PPO_model(self):
+    def init_PPO_model(self, use_custom_cnn: bool):
         from stable_baselines3 import PPO
+
+        _policy_kwargs = CNN_FE.load_FE_kwargs(use_customCNN=use_custom_cnn,
+                                               number_of_actions=self.selected_technique.number_of_actions)
 
         model = PPO(env=CL.Blank_Env(self.selected_technique.number_of_actions),
                     policy=self.selected_technique.policy,
@@ -105,9 +114,7 @@ class Doom_Models:
                     gamma=self.selected_technique.gamma,
                     clip_range=self.selected_technique.clip_range,
                     gae_lambda=self.selected_technique.gae_lambda,
-                    policy_kwargs={'features_extractor_class': CCNN.CNNFeatureExtractor,
-                                   'features_extractor_kwargs':
-                                       {'number_of_actions': self.selected_technique.number_of_actions}},
+                    policy_kwargs=_policy_kwargs,
                     device=self.device,
                     tensorboard_log=self.log_dir,
                     verbose=1)
@@ -117,7 +124,7 @@ class Doom_Models:
     def init_DQN_model(self):
         from stable_baselines3 import DQN
 
-        model = DQN(env=DummyEnv,
+        model = DQN(env=CL.Blank_Env(self.selected_technique.number_of_actions),
                     policy=self.selected_technique.policy,
                     learning_rate=self.selected_technique.learning_rate,
                     buffer_size=self.selected_technique.buffer_size,

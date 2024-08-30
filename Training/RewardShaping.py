@@ -1,4 +1,5 @@
 from Classes.ViZDoom_Gym import ViZDoom_Gym
+import vizdoom as vzd
 
 
 def deadly_corridor(self: ViZDoom_Gym, game_variables: list) -> float:
@@ -71,27 +72,54 @@ def defend_the_center(self: ViZDoom_Gym, game_variables: list) -> float:
     REWARD = 0
 
     SPENT_AMMO = ammo < self.previous_ammo
-    DAMAGED = health < self.previous_health
     GOT_KILL = killcount > self.killcount
 
     # Reward for killing a monster.
     if GOT_KILL:
-        REWARD += 10
+        REWARD += 2
 
     # Penalty for wasting ammunition without getting any kills.
     if SPENT_AMMO and not GOT_KILL:
-        REWARD -= 1
+        REWARD -= 0.5
 
-    if DAMAGED:
-        REWARD -= -5
+    REWARD += 0.05
 
-    # Update variables for the next step.
-    self.previous_health = health
+    self.previous_shot_time = self.game.get_episode_time()
     self.killcount = killcount
     self.previous_ammo = ammo
 
     return REWARD
 
 
-def deathmatch(self: ViZDoom_Gym, game_variables: list) -> float:
-    pass
+def defend_the_line(self: ViZDoom_Gym, game_variables: list):
+    # Unpack the game variables.
+    ammo, health, killcount, camera_angle = game_variables
+
+    # Initialize the Reward.
+    REWARD = 0
+
+    # Initialize useful variables.
+    LOOKS_AHEAD = (330 <= camera_angle <= 360) or (0 <= camera_angle <= 30)
+    SPENT_AMMO = self.game.get_button(vzd.ATTACK) == 1
+    GOT_KILL = killcount > self.killcount
+
+    # Reward the agent for getting a kill.
+    if GOT_KILL:
+        REWARD += 3
+
+    # Reward the agent for looking ahead at the enemies.
+    if LOOKS_AHEAD:
+        REWARD += 0.1
+
+    # Punish the agent for spending ammo without getting kills.
+    if SPENT_AMMO and not GOT_KILL:
+        REWARD -= 1
+
+    # Punish the agent for looking too far to the left or the right.
+    if not LOOKS_AHEAD:
+        REWARD -= 0.2
+
+    # Update game variables.
+    self.killcount = killcount
+
+    return REWARD

@@ -1,3 +1,4 @@
+from Other.CMD import level_selector
 from argparse import ArgumentParser
 import vizdoom as vzd
 import cv2
@@ -10,9 +11,11 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
+level = level_selector(args.scenario)
+
 game = vzd.DoomGame()
 
-game.load_config(args.scenario)
+game.load_config(level)
 game.set_render_hud(False)
 
 game.set_screen_resolution(vzd.ScreenResolution.RES_1024X576)
