@@ -29,7 +29,7 @@ class ViZDoom_Gym(Env):
         self.game = vzd.DoomGame()
         self.game.set_doom_game_path('Other/DOOM2.WAD')
 
-        self.load_config()
+        self.game.load_config(f'ViZDoom/scenarios/{self.level}.cfg')
 
         self.game.set_doom_skill(difficulty)
 
@@ -44,14 +44,6 @@ class ViZDoom_Gym(Env):
         self.game.set_window_visible(render)
 
         self.game.init()
-
-    def load_config(self):
-        if self.use_curriculum and os.path.exists(f'Levels/LevelsCurriculum/{self.level}.cfg'):
-            cfg = f'Levels/LevelsCurriculum/{self.level}.cfg'
-        else:
-            cfg = f'ViZDoom/scenarios/{self.level}.cfg'
-
-        self.game.load_config(cfg)
 
     def prepare_reward_shaping(self):
         from Training import LevelAdjustments
@@ -71,7 +63,7 @@ class ViZDoom_Gym(Env):
 
         return getattr(RewardShaping, level)(self, game_variables)
 
-    def step(self, action):
+    def step(self, chosen_action):
         # Extract the current state of the game.
         state = self.game.get_state()
 
@@ -88,7 +80,7 @@ class ViZDoom_Gym(Env):
         # Normalize from int [0 , 255] to float [-0.5 , 0.5].
         self.observation_space = process_observation(state.screen_buffer)
 
-        self.game.set_action(action=self.actions[action])
+        self.game.set_action(action=self.actions[chosen_action])
         self.game.advance_action(tics=4)
 
         # Extract the game variables from the current state.
@@ -124,15 +116,13 @@ class ViZDoom_Gym(Env):
 
         :param game_variables: The game variables of the environment
         """
-        # Get the BASE Reward from the level depending on the action taken.
-        reward = round(self.game.get_last_reward(), 3)
-
         # If reward shaping is used, enter...
         if self.reward_shaping:
             # Get the reward from the Custom Reward function.
-            reward = self.__reward_shaping(game_variables)
+            return self.__reward_shaping(game_variables)
 
-        return reward
+        # Get the BASE Reward from the level depending on the action taken.
+        return round(self.game.get_last_reward(), 3)
 
     def __display_rewards(self, reward):
         """

@@ -51,8 +51,14 @@ python ./main.py -lvl SELECT_LEVEL -m train -t YOUR_TECHNIQUE -r -d
 python ./main.py -lvl SELECT_LEVEL -m test -t YOUR_TECHNIQUE -mdl YOUR_MODEL -eps X -r -d
 ```
 
-## Display the map layout
+## Display the map layout.
 In case the layout of the scenario map is needed:
 ```bash
-python ./Other/DisplayMapLayout CHOOSETHEMAP 
+python ./Other/DisplayMapLayout.py CHOOSETHESCENARIO 
+```
+
+## Get the Agent's First-Person view.
+In case the agent's POV is needed of the scenario:
+```bash
+python ./Other/DisplayFirstPersonView.py CHOOSETHESCENARIO
 ```

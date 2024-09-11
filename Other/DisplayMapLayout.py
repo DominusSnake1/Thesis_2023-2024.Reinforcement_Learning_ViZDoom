@@ -1,5 +1,5 @@
-from Other.CMD import level_selector
 from argparse import ArgumentParser
+from CMD import level_selector
 import vizdoom as vzd
 import cv2
 
@@ -45,9 +45,6 @@ game.add_game_args("+viz_am_center 1")
 game.add_game_args("+am_backcolor 000000")
 game.init()
 
-# Not needed for the first episode but the loop is nicer.
-game.new_episode()
-
 # Gets the state
 state = game.get_state()
 
@@ -57,4 +54,7 @@ if map is not None:
     cv2.imshow("ViZDoom Automap Buffer", map)
 
 cv2.waitKey(28)
-input("Press Enter to exit...")
+
+input("Press Anything to exit...")
+
+game.close()

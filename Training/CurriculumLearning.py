@@ -61,7 +61,8 @@ class Blank_Env(Env):
     def __init__(self, actions):
         super(Blank_Env, self).__init__()
         self.action_space = spaces.Discrete(actions)
-        self.observation_space = spaces.Box(low=0, high=255, shape=(240, 320, 3), dtype=np.uint8)
+        self.actions = np.identity(actions, dtype=np.uint8)
+        self.observation_space = spaces.Box(low=0, high=255, shape=(3, 240, 320), dtype=np.uint8)
 
         def reset(self):
             return np.zeros(self.observation_space.shape)

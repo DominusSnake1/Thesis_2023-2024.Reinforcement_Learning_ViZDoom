@@ -1,6 +1,3 @@
-import Training.CNNFeatureExtractor
-
-
 class BASE_PPO:
     def __init__(self,
                  number_of_actions: int,
@@ -83,48 +80,3 @@ class PPO_RewardShaping_and_Curriculum(BASE_PPO):
 
         self.reward_shaping = True
         self.curriculum_learning = True
-
-
-class BASE_DQN:
-    def __init__(self,
-                 number_of_actions: int,
-                 learning_rate: float = 0.0001,
-                 buffer_size: int = 1_000_000,
-                 learning_starts: int = 50_000,
-                 batch_size: int = 32,
-                 tau: float = 1.0,
-                 gamma: float = 0.99,
-                 gradient_steps: int = 1,
-                 exploration_fraction: float = 0.1,
-                 exploration_initial_eps: float = 1.0,
-                 exploration_final_eps: float = 0.05,
-                 max_grad_norm: float = 10):
-        self.number_of_actions = number_of_actions
-        self.learning_rate = learning_rate
-        self.buffer_size = buffer_size
-        self.learning_starts = learning_starts
-        self.batch_size = batch_size
-        self.tau = tau
-        self.gamma = gamma
-        self.gradient_steps = gradient_steps
-        self.exploration_fraction = exploration_fraction
-        self.exploration_initial_eps = exploration_initial_eps
-        self.exploration_final_eps = exploration_final_eps
-        self.max_grad_norm = max_grad_norm
-
-        # Policy used by the model.
-        self.policy = "CnnPolicy"
-
-        # Reward shaping is not used.
-        self.reward_shaping = False
-
-        # Curriculum learning is not used.
-        self.curriculum_learning = False
-
-
-class DQN_Standard(BASE_DQN):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        # Algorithm name for identification.
-        self.algorithm = "DQN-S"

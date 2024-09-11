@@ -28,19 +28,22 @@ class Doom_Levels:
 
         selected_technique = None
 
+        config = {'number_of_actions': number_of_actions,
+                  'doom_skill': doom_skill,
+                  'learning_rate': 0.0001,
+                  'n_steps': 4096}
+
         if self.technique == 'PPO_Standard':
-            selected_technique = Techniques.PPO_Standard()
+            selected_technique = Techniques.PPO_Standard(**config)
         elif self.technique == 'PPO_RewardShaping':
             selected_technique = Techniques.PPO_RewardShaping()
         elif self.technique == 'PPO_Curriculum':
-            selected_technique = Techniques.PPO_Curriculum(number_of_actions=number_of_actions,
-                                                           doom_skill=doom_skill)
+            selected_technique = Techniques.PPO_Curriculum()
 
         self.model.set_technique(technique=selected_technique)
 
         if self.mode == 'train':
-            # model.myTrain(timesteps=100000)
-            self.model.myTrain(timesteps=4000)
+            self.model.myTrain(timesteps=500000)
         elif self.mode == 'test':
             self.model.myTest(trained_model_name=self.trained_model, episodes=self.episodes)
 
@@ -52,24 +55,25 @@ class Doom_Levels:
 
         selected_technique = None
 
+        config = {'number_of_actions': number_of_actions,
+                  'doom_skill': doom_skill,
+                  'learning_rate': 0.0004,
+                  'ent_coef': 0.001,
+                  'batch_size': 256,
+                  'n_steps': 4096,
+                  'clip_range': 0.4,
+                  'gamma': 0.9,
+                  'gae_lambda': 0.9}
+
         if self.technique == 'PPO_Standard':
-            selected_technique = Techniques.PPO_Standard(number_of_actions=number_of_actions)
+            selected_technique = Techniques.PPO_Standard(**config)
         elif self.technique == 'PPO_RewardShaping':
-            selected_technique = Techniques.PPO_RewardShaping(number_of_actions=number_of_actions,
-                                                              doom_skill=doom_skill,
-                                                              batch_size=256,
-                                                              n_steps=8192,
-                                                              learning_rate=0.0002,
-                                                              ent_coef=0.00005,
-                                                              clip_range=0.2,
-                                                              gamma=0.9,
-                                                              gae_lambda=0.95)
+            selected_technique = Techniques.PPO_RewardShaping(**config)
 
         self.model.set_technique(technique=selected_technique)
 
         if self.mode == 'train':
-            # model.myTrain(timesteps=100000)
-            self.model.myTrain(timesteps=250000, customCNN=False)
+            self.model.myTrain(timesteps=500000)
         elif self.mode == 'test':
             self.model.myTest(trained_model_name=self.trained_model, episodes=self.episodes)
 
@@ -86,12 +90,12 @@ class Doom_Levels:
             selected_technique = Techniques.PPO_Standard(number_of_actions=actions,
                                                          doom_skill=doom_skill,
                                                          batch_size=256,
-                                                         n_steps=2048,
-                                                         learning_rate=0.0001,
+                                                         n_steps=4096,
+                                                         learning_rate=0.0002,
                                                          ent_coef=0.001,
-                                                         clip_range=0.3,
-                                                         gamma=0.7,
-                                                         gae_lambda=0.9)
+                                                         clip_range=0.2,
+                                                         gamma=0.99,
+                                                         gae_lambda=0.95)
         elif self.technique == 'PPO_RewardShaping':
             selected_technique = Techniques.PPO_RewardShaping(number_of_actions=actions,
                                                               doom_skill=doom_skill,
@@ -124,10 +128,6 @@ class Doom_Levels:
                                                                              clip_range=0.1,
                                                                              gamma=0.95,
                                                                              gae_lambda=0.9)
-
-        elif self.technique == 'DQN_Standard':
-            selected_technique = Techniques.DQN_Standard(number_of_actions=actions,
-                                                         buffer_size=10_000)
 
         self.model.set_technique(technique=selected_technique)
 
@@ -183,20 +183,28 @@ class Doom_Levels:
         if self.technique == 'PPO_Standard':
             selected_technique = Techniques.PPO_Standard(number_of_actions=number_of_actions,
                                                          doom_skill=doom_skill,
-                                                         learning_rate=0.0005,
+                                                         learning_rate=0.0004,
                                                          ent_coef=0.0001,
                                                          batch_size=128,
-                                                         clip_range=0.3,
+                                                         n_steps=4096,
+                                                         clip_range=0.2,
                                                          gamma=0.9,
                                                          gae_lambda=0.9)
         elif self.technique == 'PPO_RewardShaping':
             selected_technique = Techniques.PPO_RewardShaping(number_of_actions=number_of_actions,
-                                                              doom_skill=doom_skill)
+                                                              doom_skill=doom_skill,
+                                                              learning_rate=0.0004,
+                                                              ent_coef=0.0001,
+                                                              batch_size=128,
+                                                              n_steps=4096,
+                                                              clip_range=0.2,
+                                                              gamma=0.9,
+                                                              gae_lambda=0.9)
 
         self.model.set_technique(technique=selected_technique)
 
         if self.mode == 'train':
-            self.model.myTrain(timesteps=250000)
+            self.model.myTrain(timesteps=500000)
         elif self.mode == 'test':
             self.model.myTest(trained_model_name=self.trained_model, episodes=self.episodes)
 
