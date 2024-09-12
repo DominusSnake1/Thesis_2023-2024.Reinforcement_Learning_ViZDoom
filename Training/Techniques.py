@@ -3,7 +3,7 @@ class BASE_PPO:
                  number_of_actions: int,
                  doom_skill: int,
                  learning_rate: float = 0.0003,
-                 n_steps: int = 4096,
+                 n_steps: int = 2048,
                  ent_coef: float = 0.0,
                  batch_size: int = 64,
                  clip_range: float = 0.2,
@@ -23,17 +23,15 @@ class BASE_PPO:
 
         # PPO Parameters.
         self.learning_rate = learning_rate
-        self.n_steps = n_steps
-        self.ent_coef = ent_coef
-        self.clip_range = clip_range
-        self.gamma = gamma
+        self.batch_size = batch_size
         self.gae_lambda = gae_lambda
+        self.clip_range = clip_range
+        self.ent_coef = ent_coef
+        self.n_steps = n_steps
+        self.gamma = gamma
 
         # Policy Parameters
-        self.policy = "CnnPolicy"
-        self.policy_kwargs = None
         self.number_of_actions = number_of_actions
-        self.batch_size = batch_size
 
         # Reward shaping is not used.
         self.reward_shaping = False

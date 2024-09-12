@@ -90,22 +90,21 @@ class Doom_Models:
     def init_PPO_model(self):
         from stable_baselines3 import PPO
 
-        model = PPO(env=CL.Blank_Env(self.selected_technique.number_of_actions),
-                    policy=self.selected_technique.policy,
-                    learning_rate=self.selected_technique.learning_rate,
-                    n_steps=self.selected_technique.n_steps,
-                    ent_coef=self.selected_technique.ent_coef,
-                    batch_size=self.selected_technique.batch_size,
-                    gamma=self.selected_technique.gamma,
-                    clip_range=self.selected_technique.clip_range,
-                    gae_lambda=self.selected_technique.gae_lambda,
-                    policy_kwargs={'features_extractor_kwargs':
-                                       {'features_dim': self.selected_technique.number_of_actions}},
-                    device=self.device,
-                    tensorboard_log=self.log_dir,
-                    verbose=1)
-
-        return model
+        return PPO(env=CL.Blank_Env(self.selected_technique.number_of_actions),
+                   policy="CnnPolicy",
+                   learning_rate=self.selected_technique.learning_rate,
+                   n_steps=self.selected_technique.n_steps,
+                   ent_coef=self.selected_technique.ent_coef,
+                   batch_size=self.selected_technique.batch_size,
+                   gamma=self.selected_technique.gamma,
+                   clip_range=self.selected_technique.clip_range,
+                   gae_lambda=self.selected_technique.gae_lambda,
+                   policy_kwargs={'features_extractor_kwargs':
+                                      {'features_dim': self.selected_technique.number_of_actions}
+                                  },
+                   device=self.device,
+                   tensorboard_log=self.log_dir,
+                   verbose=1)
 
     def load_trained_model(self, trained_model_name):
         """
