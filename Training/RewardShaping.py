@@ -8,21 +8,23 @@ def basic(self: ViZDoom_Gym, game_variables: list) -> float:
 
     REWARD = 0
 
-    FINISHED = self.game.is_episode_finished()
-    SPENT_AMMO = ammo < self.previous_ammo
+    SHOT = self.game.get_button(vzd.ATTACK) == 1
     GOT_KILL = killcount > self.killcount
 
     if GOT_KILL:
-        REWARD += 10
+        REWARD += 100
 
-    if SPENT_AMMO and not GOT_KILL:
-        REWARD -= 1
+        time_penalty = self.game.get_episode_time() - self.previous_time
+        REWARD += max(10 - time_penalty, 0)
 
-    if FINISHED and not GOT_KILL:
-        REWARD -= 5
+    if SHOT:
+        REWARD += 1
 
+    if SHOT and not GOT_KILL:
+        REWARD -= 0.5
+
+    self.previous_time = self.game.get_episode_time()
     self.killcount = killcount
-    self.previous_ammo = ammo
 
     return REWARD
 
@@ -34,92 +36,65 @@ def deadly_corridor(self: ViZDoom_Gym, game_variables: list) -> float:
     :return: Extra reward according to the coefficients.
     """
     # Unpack the game variables.
-    health, killcount, hits_taken, armor, pos_x = game_variables
+    health, killcount, damage_taken = game_variables
 
     # Initializations.
     REWARD = 0
 
-    MOVED_CLOSER_TO_VEST = pos_x > self.X_position
-    STAYED_IN_PLACE = pos_x == self.X_position
-    TOOK_DAMAGE = hits_taken > self.hits_taken
+    DAMAGED = damage_taken > self.damage_taken
     GOT_KILL = killcount > self.killcount
-    GOT_ARMOR = armor > 0
-    IS_DEAD = health <= 0
+    IS_ALIVE = health > 0
 
-    # Get (+) reward when the agent moves closer to the vest.
-    if MOVED_CLOSER_TO_VEST:
-        REWARD += 50
+    current_distance = self.game.get_game_variable(vzd.POSITION_X) - 1312
+    REWARD += (current_distance - self.previous_distance) * 50
 
-    # Get (+) reward when the agent gets a kill.
     if GOT_KILL:
-        REWARD += 50
+        REWARD += 100
 
-    # Get (+) reward if the agent took no extra damage this step.
-    if not TOOK_DAMAGE:
+    if DAMAGED:
+        REWARD -= (damage_taken - self.damage_taken) * 0.2
+
+    if IS_ALIVE:
         REWARD += 5
 
-    # Get (+) reward if the agent got the armor.
-    if GOT_ARMOR:
-        REWARD += 1000
-
-    # Get (-) if the agent dies.
-    if IS_DEAD:
-        REWARD -= 50
-
-    # Get (-) reward only when the agent gets hit.
-    if TOOK_DAMAGE:
-        REWARD -= 15
-
-    # Get (-) reward only when the agent moves away from the vest.
-    if not MOVED_CLOSER_TO_VEST:
-        REWARD -= 50
-
-    # Get (-) reward when the agent stays in place.
-    if STAYED_IN_PLACE:
-        REWARD -= 5
-
-    # Get (-) reward per timestep.
-    REWARD += 1
+    REWARD -= 1
 
     # Update the values for the next step.
+    self.previous_distance = current_distance
+    self.damage_taken = damage_taken
     self.killcount = killcount
-    self.hits_taken = hits_taken
-    self.X_position = pos_x
 
     return REWARD
 
 
 def defend_the_center(self: ViZDoom_Gym, game_variables: list) -> float:
     # Unpack game variables.
-    ammo, health, killcount, hits_taken = game_variables
+    ammo, health, killcount, damage_taken = game_variables
 
     # Initial reward.
     REWARD = 0
 
     # Initialize useful variables.
-    GOT_DAMAGED = hits_taken > self.prev_hits_taken
+    DAMAGED = damage_taken > self.prev_damage_taken
     GOT_KILL = killcount > self.prev_killcount
     SPENT_AMMO = ammo < self.prev_ammo
-    IS_DEAD = health <= 0
 
     # Reward the agent for getting kills.
     if GOT_KILL:
-        REWARD += 200
+        REWARD += 50
 
     # Punish the agent for wasting ammo.
     if SPENT_AMMO and not GOT_KILL:
-        REWARD -= 50
+        REWARD -= 5
 
     # Punish the agent for getting damaged.
-    if GOT_DAMAGED:
-        REWARD -= 10
+    if DAMAGED:
+        REWARD -= (damage_taken - self.prev_damage_taken) * 1
 
-    # Punish the agent for dying.
-    if IS_DEAD:
-        REWARD -= 1000
+    REWARD += 0.1
 
     # Update variables.
-    self.prev_hits_taken = hits_taken
+    self.prev_damage_taken = damage_taken
     self.prev_killcount = killcount
     self.prev_ammo = ammo
 
@@ -128,30 +103,26 @@ def defend_the_center(self: ViZDoom_Gym, game_variables: list) -> float:
 
 def defend_the_line(self: ViZDoom_Gym, game_variables: list):
     # Unpack the game variables.
-    ammo, health, killcount, damage_taken, angle = game_variables
+    ammo, health, killcount, damage_taken = game_variables
 
     # Initialize the Reward.
     REWARD = 0
 
     # Initialize useful variables.
-    FRANTIC_LOOK = abs(angle - self.previous_camera_angle) > 20
     SHOT = self.game.get_button(vzd.ATTACK) == 1
     DAMAGED = damage_taken > self.damage_taken
     GOT_KILL = killcount > self.killcount
 
     # Reward the agent for getting a kill.
     if GOT_KILL:
-        REWARD += 20
+        REWARD += 50
 
     # Punish the agent for spending ammo without getting kills.
     if SHOT and not GOT_KILL:
-        REWARD -= 1
+        REWARD -= 5
 
     if DAMAGED:
-        REWARD -= (damage_taken - self.damage_taken) * 0.3
-
-    if FRANTIC_LOOK:
-        REWARD -= 1
+        REWARD -= (damage_taken - self.damage_taken) * 1
 
     REWARD += 0.1
 

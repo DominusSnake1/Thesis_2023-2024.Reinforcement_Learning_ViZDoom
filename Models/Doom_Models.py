@@ -89,9 +89,10 @@ class Doom_Models:
 
     def init_PPO_model(self):
         from stable_baselines3 import PPO
+        from stable_baselines3.common import policies
 
         return PPO(env=CL.Blank_Env(self.selected_technique.number_of_actions),
-                   policy="CnnPolicy",
+                   policy=policies.ActorCriticCnnPolicy,
                    learning_rate=self.selected_technique.learning_rate,
                    n_steps=self.selected_technique.n_steps,
                    ent_coef=self.selected_technique.ent_coef,

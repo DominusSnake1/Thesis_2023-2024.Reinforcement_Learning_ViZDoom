@@ -12,7 +12,6 @@ def level_selector(level: str) -> str:
         'basic': 'b',
         'defend_the_center': 'dtc',
         'deadly_corridor': 'dc',
-        'deathmatch': 'dm',
         'defend_the_line': 'dtl'
     }
 
@@ -48,9 +47,7 @@ def technique_selector(technique: str) -> str:
     techniques = ['PPO_Standard',
                   'PPO_RewardShaping',
                   'PPO_Curriculum',
-                  'PPO_RewardShaping_and_Curriculum',
-                  'PPO_CustomCNN',
-                  'DQN_Standard']
+                  'PPO_RewardShaping_and_Curriculum']
 
     if technique not in techniques:
         exception_message = "Please select a technique from the list:\n"

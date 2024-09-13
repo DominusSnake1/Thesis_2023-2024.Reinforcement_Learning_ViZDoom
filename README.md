@@ -45,6 +45,11 @@ If help is needed, type `main.py -h` or `main.py --help` for a quick explanation
 ```bash
 python ./main.py -lvl SELECT_LEVEL -m train -t YOUR_TECHNIQUE -r -d
 ```
+
+There is also a script included to run and train all scenarios with all Techniques.
+```bash
+./superset.sh
+```
 #### * Testing Mode.
 (Pick a model from `Data/Train/PICK_YOUR_LEVEL`)
 ```bash

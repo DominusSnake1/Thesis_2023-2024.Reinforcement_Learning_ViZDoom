@@ -30,20 +30,23 @@ class Doom_Levels:
 
         config = {'number_of_actions': number_of_actions,
                   'doom_skill': doom_skill,
+                  'ent_coef': 0.0001,
                   'learning_rate': 0.0001,
                   'n_steps': 4096}
 
         if self.technique == 'PPO_Standard':
             selected_technique = Techniques.PPO_Standard(**config)
         elif self.technique == 'PPO_RewardShaping':
-            selected_technique = Techniques.PPO_RewardShaping()
+            selected_technique = Techniques.PPO_RewardShaping(**config)
         elif self.technique == 'PPO_Curriculum':
-            selected_technique = Techniques.PPO_Curriculum()
+            selected_technique = Techniques.PPO_Curriculum(**config)
+        elif self.technique == 'PPO_RewardShaping_and_Curriculum':
+            selected_technique = Techniques.PPO_RewardShaping_and_Curriculum(**config)
 
         self.model.set_technique(technique=selected_technique)
 
         if self.mode == 'train':
-            self.model.myTrain(timesteps=500000)
+            self.model.myTrain(timesteps=300000)
         elif self.mode == 'test':
             self.model.myTest(trained_model_name=self.trained_model, episodes=self.episodes)
 
@@ -69,11 +72,15 @@ class Doom_Levels:
             selected_technique = Techniques.PPO_Standard(**config)
         elif self.technique == 'PPO_RewardShaping':
             selected_technique = Techniques.PPO_RewardShaping(**config)
+        elif self.technique == 'PPO_Curriculum':
+            selected_technique = Techniques.PPO_Curriculum(**config)
+        elif self.technique == 'PPO_RewardShaping_and_Curriculum':
+            selected_technique = Techniques.PPO_RewardShaping_and_Curriculum(**config)
 
         self.model.set_technique(technique=selected_technique)
 
         if self.mode == 'train':
-            self.model.myTrain(timesteps=500000)
+            self.model.myTrain(timesteps=300000)
         elif self.mode == 'test':
             self.model.myTest(trained_model_name=self.trained_model, episodes=self.episodes)
 
@@ -86,84 +93,29 @@ class Doom_Levels:
 
         selected_technique = None
 
+        config = {'number_of_actions': actions,
+                  'doom_skill': doom_skill,
+                  'batch_size': 256,
+                  'n_steps': 8192,
+                  'learning_rate': 0.0002,
+                  'ent_coef': 0.01,
+                  'clip_range': 0.1,
+                  'gamma': 0.95,
+                  'gae_lambda': 0.9}
+
         if self.technique == 'PPO_Standard':
-            selected_technique = Techniques.PPO_Standard(number_of_actions=actions,
-                                                         doom_skill=doom_skill,
-                                                         batch_size=256,
-                                                         n_steps=4096,
-                                                         learning_rate=0.0002,
-                                                         ent_coef=0.001,
-                                                         clip_range=0.2,
-                                                         gamma=0.99,
-                                                         gae_lambda=0.95)
+            selected_technique = Techniques.PPO_Standard(**config)
         elif self.technique == 'PPO_RewardShaping':
-            selected_technique = Techniques.PPO_RewardShaping(number_of_actions=actions,
-                                                              doom_skill=doom_skill,
-                                                              batch_size=256,
-                                                              n_steps=4096,
-                                                              learning_rate=0.0002,
-                                                              ent_coef=0.001,
-                                                              clip_range=0.05,
-                                                              gamma=0.99,
-                                                              gae_lambda=0.9)
-
+            selected_technique = Techniques.PPO_RewardShaping(**config)
         elif self.technique == 'PPO_Curriculum':
-            selected_technique = Techniques.PPO_Curriculum(number_of_actions=actions,
-                                                           default_skill=doom_skill,
-                                                           batch_size=256,
-                                                           n_steps=8192,
-                                                           learning_rate=0.0002,
-                                                           ent_coef=0.01,
-                                                           clip_range=0.1,
-                                                           gamma=0.95,
-                                                           gae_lambda=0.9)
-
+            selected_technique = Techniques.PPO_Curriculum(**config)
         elif self.technique == 'PPO_RewardShaping_and_Curriculum':
-            selected_technique = Techniques.PPO_RewardShaping_and_Curriculum(number_of_actions=actions,
-                                                                             default_skill=doom_skill,
-                                                                             batch_size=256,
-                                                                             n_steps=8192,
-                                                                             learning_rate=0.0002,
-                                                                             ent_coef=0.01,
-                                                                             clip_range=0.1,
-                                                                             gamma=0.95,
-                                                                             gae_lambda=0.9)
+            selected_technique = Techniques.PPO_RewardShaping_and_Curriculum(**config)
 
         self.model.set_technique(technique=selected_technique)
 
         if self.mode == 'train':
-            self.model.myTrain(timesteps=200000)
-        elif self.mode == 'test':
-            self.model.myTest(trained_model_name=self.trained_model, episodes=self.episodes)
-
-    def deathmatch(self, number_of_actions: int = 17, doom_skill: int = 3):
-        print("\nDescription:\n"
-              "In this scenario, the agent is spawned in the random place of the arena filled with "
-              "resources. A random monster is spawned every few seconds that will try to kill the player. The reward "
-              "for killing a monster depends on its difficulty. The aim of the agent is to kill as many monsters as "
-              "possible before the time runs out or it’s killed by monsters.\n")
-
-        selected_technique = None
-
-        if self.technique == 'PPO_Standard':
-            selected_technique = Techniques.PPO_Standard(number_of_actions=number_of_actions,
-                                                         doom_skill=doom_skill,
-                                                         batch_size=256,
-                                                         n_steps=8192,
-                                                         learning_rate=0.0003,
-                                                         ent_coef=0.001,
-                                                         clip_range=0.1,
-                                                         gamma=0.95,
-                                                         gae_lambda=0.9)
-        elif self.technique == 'PPO_RewardShaping':
-            selected_technique = Techniques.PPO_RewardShaping()
-        elif self.technique == 'PPO_Curriculum':
-            selected_technique = Techniques.PPO_Curriculum(default_skill=doom_skill)
-
-        self.model.set_technique(technique=selected_technique)
-
-        if self.mode == 'train':
-            self.model.myTrain(timesteps=400000)
+            self.model.myTrain(timesteps=300000)
         elif self.mode == 'test':
             self.model.myTest(trained_model_name=self.trained_model, episodes=self.episodes)
 
@@ -180,48 +132,28 @@ class Doom_Levels:
 
         selected_technique = None
 
+        config = {'number_of_actions': number_of_actions,
+                  'doom_skill': doom_skill,
+                  'learning_rate': 0.0004,
+                  'ent_coef': 0.0001,
+                  'batch_size': 128,
+                  'n_steps': 4096,
+                  'clip_range': 0.2,
+                  'gamma': 0.9,
+                  'gae_lambda': 0.9}
+
         if self.technique == 'PPO_Standard':
-            selected_technique = Techniques.PPO_Standard(number_of_actions=number_of_actions,
-                                                         doom_skill=doom_skill,
-                                                         learning_rate=0.0004,
-                                                         ent_coef=0.0001,
-                                                         batch_size=128,
-                                                         n_steps=4096,
-                                                         clip_range=0.2,
-                                                         gamma=0.9,
-                                                         gae_lambda=0.9)
+            selected_technique = Techniques.PPO_Standard(**config)
         elif self.technique == 'PPO_RewardShaping':
-            selected_technique = Techniques.PPO_RewardShaping(number_of_actions=number_of_actions,
-                                                              doom_skill=doom_skill,
-                                                              learning_rate=0.0004,
-                                                              ent_coef=0.0001,
-                                                              batch_size=128,
-                                                              n_steps=4096,
-                                                              clip_range=0.2,
-                                                              gamma=0.9,
-                                                              gae_lambda=0.9)
+            selected_technique = Techniques.PPO_RewardShaping(**config)
+        elif self.technique == 'PPO_Curriculum':
+            selected_technique = Techniques.PPO_Curriculum(**config)
+        elif self.technique == 'PPO_RewardShaping_and_Curriculum':
+            selected_technique = Techniques.PPO_RewardShaping_and_Curriculum(**config)
 
         self.model.set_technique(technique=selected_technique)
 
         if self.mode == 'train':
-            self.model.myTrain(timesteps=500000)
+            self.model.myTrain(timesteps=300000)
         elif self.mode == 'test':
             self.model.myTest(trained_model_name=self.trained_model, episodes=self.episodes)
-
-    def health_gathering(self):
-        pass
-
-    def health_gathering_supreme(self):
-        pass
-
-    def my_way_home(self):
-        pass
-
-    def predict_position(self):
-        pass
-
-    def take_cover(self):
-        pass
-
-    def e1m1(self):
-        pass

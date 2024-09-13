@@ -49,17 +49,11 @@ class ViZDoom_Gym(Env):
         from Training import LevelAdjustments
         level = self.level
 
-        if self.use_curriculum:
-            level = level[:-3]
-
         return getattr(LevelAdjustments, level)(self)
 
     def __reward_shaping(self, game_variables: np.ndarray) -> float:
         from Training import RewardShaping
         level = self.level
-
-        if self.use_curriculum:
-            level = level[:-3]
 
         return getattr(RewardShaping, level)(self, game_variables)
 
