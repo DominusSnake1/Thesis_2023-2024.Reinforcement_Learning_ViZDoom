@@ -74,7 +74,7 @@ class PPO_RewardShaping_and_Curriculum(BASE_PPO):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.algorithm = "PPO-RW-CL"
+        self.algorithm = "PPO-RSCL"
 
         self.reward_shaping = True
         self.curriculum_learning = True

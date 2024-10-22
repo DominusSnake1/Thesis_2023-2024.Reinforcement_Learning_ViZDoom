@@ -113,9 +113,9 @@ class ViZDoom_Gym(Env):
         # If reward shaping is used, enter...
         if self.reward_shaping:
             # Get the reward from the Custom Reward function.
-            return self.__reward_shaping(game_variables)
+            return round(self.__reward_shaping(game_variables), 3)
 
-        # Get the BASE Reward from the level depending on the action taken.
+        # Get the reward from the Default Reward Function of the level depending on the action taken.
         return round(self.game.get_last_reward(), 3)
 
     def __display_rewards(self, reward):

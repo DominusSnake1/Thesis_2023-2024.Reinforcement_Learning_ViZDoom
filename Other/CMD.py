@@ -44,10 +44,17 @@ def mode_selector(mode: str) -> str:
 
 
 def technique_selector(technique: str) -> str:
-    techniques = ['PPO_Standard',
-                  'PPO_RewardShaping',
-                  'PPO_Curriculum',
-                  'PPO_RewardShaping_and_Curriculum']
+    techniques = {
+        'PPO_Standard': 'S',
+        'PPO_RewardShaping': 'RS',
+        'PPO_Curriculum': 'CL',
+        'PPO_RewardShaping_and_Curriculum': 'RSCL'
+    }
+
+    # Checks whether the given technique matches any entry (full or short) in the above dictionary.
+    for full_name, short_name in techniques.items():
+        if technique == full_name or technique == short_name:
+            return full_name
 
     if technique not in techniques:
         exception_message = "Please select a technique from the list:\n"

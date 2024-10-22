@@ -71,8 +71,7 @@ class Doom_Models:
         doom = ViZDoom_Gym(level=self.level,
                            difficulty=self.selected_technique.doom_skill,
                            render=self.render,
-                           display_rewards=self.display_rewards,
-                           reward_shaping=self.selected_technique.reward_shaping)
+                           display_rewards=self.display_rewards)
 
         # Load the trained model from the files.
         trained_model = self.load_trained_model(trained_model_name)
